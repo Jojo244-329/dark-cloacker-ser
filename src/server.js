@@ -3,8 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
-
-
+const redis = require('redis'); // <--- Novo import
 
 const app = express();
 
@@ -25,18 +24,37 @@ app.use('/api/cloak', cloakRoutes);
 app.use('/cloak/script', scriptRoutes);
 app.use('/api/payload', payloadRoutes);
 
+// 🧠 Conecta Redis (opcional)
+if (process.env.REDIS_URL) {
+  const redisClient = redis.createClient({
+    url: process.env.REDIS_URL,
+  });
+
+  redisClient.on('error', (err) => {
+    console.error('❌ Erro ao conectar no Redis:', err.message);
+  });
+
+  redisClient.connect()
+    .then(() => {
+      console.log('🔥 Redis conectado com sucesso');
+      // Se quiser exportar pra usar em outros arquivos:
+      // module.exports.redisClient = redisClient;
+    })
+    .catch((err) => {
+      console.error('❌ Erro ao conectar no Redis:', err.message);
+    });
+} else {
+  console.warn("⚠️ Variável REDIS_URL não definida. Pulando Redis.");
+}
+
 // ⚡ Conexão com MongoDB protegida
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      // opções extras não são mais obrigatórias nas últimas versões
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true
-    });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('🔥 MongoDB conectado com sucesso');
   } catch (err) {
     console.error('❌ Erro ao conectar no MongoDB:', err.message);
-    process.exit(1); // encerra app se não conectar
+    process.exit(1);
   }
 })();
 
