@@ -1,19 +1,26 @@
 // src/controllers/domain.controller.js
-
 const Domain = require('../models/Domain');
 
 // 🔥 Criar novo domínio
 const createDomain = async (req, res) => {
   try {
-    const { slug, url, baseUrl, fallbackUrl } = req.body;
+    const { slug, officialUrl, realUrl, baseUrl, fallbackUrl } = req.body;
 
-    // Checa se o slug já existe
-    const existing = await Domain.findOne({ slug });
+    // Validação
+    if (!slug || !officialUrl || !realUrl || !baseUrl) {
+      return res.status(400).json({
+        error: "slug, officialUrl, realUrl e baseUrl são obrigatórios"
+      });
+    }
+
+    // Checa se o slug já existe pro mesmo user
+    const existing = await Domain.findOne({ slug, userId: req.user.id });
     if (existing) return res.status(400).json({ error: 'Slug já em uso' });
 
     const newDomain = await Domain.create({
       slug,
-      url,
+      officialUrl,
+      realUrl,
       baseUrl,
       fallbackUrl,
       userId: req.user.id,
@@ -39,11 +46,11 @@ const getUserDomains = async (req, res) => {
 const updateDomain = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const { slug, officialUrl, realUrl, baseUrl, fallbackUrl } = req.body;
 
     const domain = await Domain.findOneAndUpdate(
       { _id: id, userId: req.user.id },
-      updates,
+      { slug, officialUrl, realUrl, baseUrl, fallbackUrl },
       { new: true }
     );
 
@@ -70,10 +77,23 @@ const deleteDomain = async (req, res) => {
   }
 };
 
-// Exporta corretamente agora
+// 🔍 Buscar domínio por slug
+const getDomainBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const domain = await Domain.findOne({ slug, userId: req.user.id });
+    if (!domain) return res.status(404).json({ error: 'Domínio não encontrado' });
+    return res.status(200).json(domain);
+  } catch (err) {
+    return res.status(500).json({ error: 'Erro ao buscar domínio', details: err.message });
+  }
+};
+
+// Exporta os controllers
 module.exports = {
   createDomain,
   getUserDomains,
   updateDomain,
-  deleteDomain // se existir
+  deleteDomain,
+  getDomainBySlug
 };

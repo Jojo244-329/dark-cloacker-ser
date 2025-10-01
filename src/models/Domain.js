@@ -1,12 +1,32 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const domainSchema = new mongoose.Schema({
-  slug: { type: String, required: true, unique: true }, // identificador único pro script
-  url: { type: String, required: true },                // domínio principal (landing real)
-  baseUrl: { type: String, required: true },            // usado no script.routes.js
-  fallbackUrl: { type: String, default: 'https://google.com' }, // pra onde manda se detectar bot/erro
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const DomainSchema = new mongoose.Schema({
+  slug: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  officialUrl: {                // Domínio público (fachada, Ads, URL oficial)
+    type: String,
+    required: true
+  },
+  realUrl: {                    // Onde está a landing real (Netlify, HostGator, etc.)
+    type: String,
+    required: true
+  },
+  baseUrl: {                    // Dummy para bots
+    type: String,
+    required: true
+  },
+  fallbackUrl: {                // Fallback para auditores/devtools
+    type: String,
+    default: "https://google.com"
+  },
+  userId: {                     // Dono do domínio
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
 }, { timestamps: true });
 
-module.exports =
-  mongoose.models.Domain || mongoose.model('Domain', domainSchema);
+module.exports = mongoose.model("Domain", DomainSchema);

