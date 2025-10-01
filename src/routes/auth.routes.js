@@ -5,7 +5,7 @@ const { autenticar } = require('../middlewares/auth.middleware');
 
 
 router.post('/register', register);
-router.post('login', login);
+router.post('/login', login);
 router.get('/me', autenticar, me);
 
 
