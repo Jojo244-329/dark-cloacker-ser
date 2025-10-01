@@ -69,3 +69,10 @@ exports.deleteDomain = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao deletar domínio', details: err.message });
   }
 };
+
+module.exports = {
+  createDomain,
+  getUserDomains,
+  updateDomain,
+  deleteDomain,
+};
