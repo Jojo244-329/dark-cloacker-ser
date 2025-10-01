@@ -21,6 +21,7 @@ const payloadRoutes = require('./routes/payload.routes');
 // 🚏 Usa rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/cloak', cloakRoutes);
+app.use("/api/domain", require("./routes/domain.routes"));
 app.use('/cloak/script', scriptRoutes);
 app.use('/api/payload', payloadRoutes);
 
