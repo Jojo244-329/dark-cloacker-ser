@@ -17,7 +17,7 @@ const authRoutes = require('./routes/auth.routes');
 const cloakRoutes = require('./routes/cloak.routes');
 const scriptRoutes = require('./routes/script.routes');
 const payloadRoutes = require('./routes/payload.routes');
-const domainRoutes = require("./routes/domain.routes");
+const domainRoutes = require("./routes/domain.routes.js");
 
 // 🚏 Usa rotas
 app.use('/api/auth', authRoutes);

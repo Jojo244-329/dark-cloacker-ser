@@ -7,7 +7,7 @@ const {
   getUserDomains,
   deleteDomain,
   updateDomain
-} = require('../controllers/domain.controller');
+} = require('../controllers/domain.controller.js');
 
 // Criar domínio
 router.post('/', auth, createDomain);
