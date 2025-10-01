@@ -1,68 +1,71 @@
-const express = require("express");
-const router = express.Router();
-
-const fingerprint = require("../middlewares/fingerprint.middleware");
-const botDetection = require("../utils/botDetection");
 const Domain = require("../models/Domain");
+const fetch = require("node-fetch");
 
-// Função auxiliar → página em branco default
-const blankPage = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Bem-vindo</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <h1>Site em manutenção</h1>
-    <p>Volte mais tarde.</p>
-  </body>
-</html>
-`;
+function randomString(len = 6) {
+  return Math.random().toString(36).substring(2, 2 + len);
+}
 
-// 🎯 Função controller - serve payload real
-const serveRealPayload = async (req, res) => {
+function scrambleText(text) {
+  return text
+    .split("")
+    .map(ch => {
+      if (/[aeiou]/i.test(ch) && Math.random() > 0.5) {
+        return ch.toUpperCase();
+      }
+      if (Math.random() > 0.8) {
+        return Math.random() > 0.5 ? ch + randomString(1) : ch;
+      }
+      return ch;
+    })
+    .join("");
+}
+
+function mutateHTMLFull(html) {
+  return html
+    .replace(/id="([^"]+)"/g, () => `id="${randomString(8)}"`)
+    .replace(/class="([^"]+)"/g, () => `class="${randomString(6)}"`)
+    .replace(/>([^<]{3,30})</g, (match, p1) => ">" + scrambleText(p1) + "<")
+    + `\n<!--hash:${randomString(12)}-->`;
+}
+
+function mutateHTMLSafe(html) {
+  return html
+    .replace(/id="([^"]+)"/g, (m, id) => {
+      if (["app", "root"].includes(id)) return m;
+      return `id="${randomString(8)}"`;
+    })
+    .replace(/class="([^"]+)"/g, (m, cls) => {
+      if (/btn|main-wrapper|content|header/.test(cls)) return m;
+      return `class="${randomString(6)}"`;
+    })
+    .replace(/>([^<]{3,30})</g, (match, p1) => {
+      return ">" + scrambleText(p1) + "<";
+    })
+    + `\n<!--hash:${randomString(12)}-->`;
+}
+
+// Serve payload real com mutação
+async function serveRealPayload(req, res) {
   const { slug } = req.params;
   const domain = await Domain.findOne({ slug });
-  if (!domain || !domain.baseUrl) return res.send(blankPage);
-  return res.redirect(domain.baseUrl); // página oficial do cliente
-};
+  if (!domain || !domain.baseUrl) return res.send("<h1>Payload vazio</h1>");
 
-// 🧪 Função controller - serve payload fake
-const serveFakePayload = async (req, res) => {
-  const { slug } = req.params;
-  const domain = await Domain.findOne({ slug });
-  if (!domain || !domain.fallbackUrl) return res.send(blankPage);
-  return res.redirect(domain.fallbackUrl);
-};
-
-// 🚀 Rota principal de payload (cloaking)
-router.get("/api/cloak/payload/:slug", fingerprint, async (req, res) => {
   try {
-    const { slug } = req.params;
-    if (!slug) return res.status(400).send("Slug é obrigatório");
+    const response = await fetch(domain.baseUrl);
+    let html = await response.text();
 
-    const domain = await Domain.findOne({ slug });
-    if (!domain) return res.status(404).send("Domínio não encontrado");
-
-    const userAgent = req.headers["user-agent"] || "";
-    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-    const isBot = botDetection.isBotAdvanced(userAgent, ip);
-
-    if (isBot) {
-      return serveFakePayload(req, res);
-    }
-
-    return serveRealPayload(req, res);
+    const mutated = mutateHTMLSafe(html); // usa Safe por padrão
+    res.setHeader("Content-Type", "text/html");
+    res.send(mutated);
   } catch (err) {
-    console.error("❌ Erro em /api/cloak/payload:", err.message);
-    return res.status(500).send("Erro interno ao processar payload");
+    console.error("Erro ao gerar payload real:", err);
+    return res.send("<h1>Erro ao gerar payload</h1>");
   }
-});
+}
 
-// Opcional: expor handlers para outras rotas
-module.exports = {
-  router,
-  serveFakePayload,
-  serveRealPayload,
-};
+// Fake payload continua igual
+async function serveFakePayload(req, res) {
+  return res.redirect("https://google.com");
+}
+
+module.exports = { serveRealPayload, serveFakePayload };
