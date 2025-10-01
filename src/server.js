@@ -17,11 +17,12 @@ const authRoutes = require('./routes/auth.routes');
 const cloakRoutes = require('./routes/cloak.routes');
 const scriptRoutes = require('./routes/script.routes');
 const payloadRoutes = require('./routes/payload.routes');
+const domainRoutes = require("./routes/domain.routes");
 
 // 🚏 Usa rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/cloak', cloakRoutes);
-app.use("/api/domain", require("./routes/domain.routes"));
+app.use('/api/domain', domainRoutes);
 app.use('/cloak/script', scriptRoutes);
 app.use('/api/payload', payloadRoutes);
 
