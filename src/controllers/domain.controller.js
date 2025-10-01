@@ -3,7 +3,7 @@
 const Domain = require('../models/Domain');
 
 // 🔥 Criar novo domínio
-exports.createDomain = async (req, res) => {
+const createDomain = async (req, res) => {
   try {
     const { slug, url, baseUrl, fallbackUrl } = req.body;
 
@@ -26,7 +26,7 @@ exports.createDomain = async (req, res) => {
 };
 
 // 🔍 Listar domínios do usuário autenticado
-exports.getUserDomains = async (req, res) => {
+const getUserDomains = async (req, res) => {
   try {
     const domains = await Domain.find({ userId: req.user.id }).sort({ createdAt: -1 });
     return res.status(200).json(domains);
@@ -36,7 +36,7 @@ exports.getUserDomains = async (req, res) => {
 };
 
 // 🛠 Atualizar domínio (se for do próprio user)
-exports.updateDomain = async (req, res) => {
+const updateDomain = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -56,7 +56,7 @@ exports.updateDomain = async (req, res) => {
 };
 
 // 💀 Deletar domínio (só se for do user)
-exports.deleteDomain = async (req, res) => {
+const deleteDomain = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -70,6 +70,7 @@ exports.deleteDomain = async (req, res) => {
   }
 };
 
+// Exporta corretamente agora
 module.exports = {
   createDomain,
   getUserDomains,
