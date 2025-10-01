@@ -34,7 +34,7 @@ next();
 
 
 module.exports = {
-autenticar,
+auth: autenticar,
 isAdmin,
 isClient
 };

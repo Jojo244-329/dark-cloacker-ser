@@ -75,5 +75,5 @@ module.exports = {
   createDomain,
   getUserDomains,
   updateDomain,
-  deleteDomain,
+  deleteDomain // se existir
 };
