@@ -5,8 +5,8 @@ const { auth } = require('../middlewares/auth.middleware');
 const {
   createDomain,
   getUserDomains,
-  updateDomain,
   deleteDomain,
+  updateDomain
 } = require('../controllers/domain.controller');
 
 // Criar domínio
