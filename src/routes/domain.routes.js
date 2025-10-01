@@ -10,15 +10,15 @@ const {
 } = require('../controllers/domain.controller.js');
 
 // Criar domínio
-router.post('/', auth, createDomain);
+router.post('/', autenticar, createDomain);
 
 // Listar domínios do user
-router.get('/', auth, getUserDomains);
+router.get('/', autenticar, getUserDomains);
 
 // Editar domínio do próprio usuário
-router.put('/:id', auth, updateDomain);
+router.put('/:id', autenticar, updateDomain);
 
 // Deletar domínio do próprio usuário
-router.delete('/:id', auth, deleteDomain);
+router.delete('/:id', autenticar, deleteDomain);
 
 module.exports = router;
