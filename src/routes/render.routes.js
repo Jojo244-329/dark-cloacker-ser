@@ -54,7 +54,7 @@ router.get('/:slug', async (req, res) => {
    return res.redirect(domain.realUrl); // Página real liberada
   } catch (err) {
     console.error("❌ Erro em render.routes:", err.message);
-    return res.redirect(domain?.baseUrl || 'https://google.com');
+    return res.redirect(domain?.baseUrl);
   }
 });
 
