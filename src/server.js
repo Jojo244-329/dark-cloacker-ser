@@ -100,9 +100,14 @@ app.use(async (req, res, next) => {
     html = mutateHTMLSafe(html);
     html = html.replace(/(src|href)=["']\.\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
     html = html.replace(/(src|href)=["']\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
+    html = html.replace(/<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, "");
+
     html = html.replace("</body>", `${antiDebug}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:");
+    
     return res.send(html);
 
   } catch (err) {
