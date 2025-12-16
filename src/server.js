@@ -17,13 +17,13 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas API
+// Rotas da API
 const authRoutes = require("./routes/auth.routes");
 const domainRoutes = require("./routes/domain.routes");
 app.use("/api/auth", authRoutes);
 app.use("/api/domain", domainRoutes);
 
-// Conexão Mongo
+// Conexão MongoDB
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -34,7 +34,7 @@ app.use("/api/domain", domainRoutes);
   }
 })();
 
-// Middleware principal do cloaking
+// Middleware universal (cloaking + proxy)
 app.use(async (req, res, next) => {
   try {
     const host = req.hostname;
@@ -49,7 +49,7 @@ app.use(async (req, res, next) => {
     const targetUrl = isBotVisit ? domain.baseUrl : domain.realUrl;
     const fullUrl = `${targetUrl}${urlPath}`;
 
-    // Verifica se é asset (arquivo)
+    // 🔁 Proxy de assets (css, js, fontes, imagens, etc)
     const isAsset = /\.(js|css|png|jpe?g|gif|svg|woff2?|ttf|eot|ico|json|txt|webp|mp4|map)(\?.*)?$/.test(urlPath);
     if (isAsset) {
       return createProxyMiddleware({
@@ -64,7 +64,7 @@ app.use(async (req, res, next) => {
       })(req, res);
     }
 
-    // Requisição principal HTML (index)
+    // 🔁 Proxy do HTML principal (com mutação e proteção)
     const headers = {
       "User-Agent": ua,
       "X-Forwarded-For": ip,
@@ -74,7 +74,7 @@ app.use(async (req, res, next) => {
     const response = await axios.get(fullUrl, { headers });
     let html = response.data;
 
-    // Injeção de script anti-clonagem/devtools
+    // Proteção anti-devtools e clonagem
     const antiDebug = `
       <script>
         function devtoolsDetector(){
@@ -109,7 +109,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Início do servidor
+// Start
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);
