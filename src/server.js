@@ -20,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/white", express.static(path.join(__dirname, "public", "white")));
 app.use("/black", express.static(path.join(__dirname, "public", "black")));
 
+// 🛠️ Serve os assets (css, js, fontes) usados nos HTMLs
+app.use("/assets", express.static(path.join(__dirname, "public", "black", "assets")));  // ⬅️ ADICIONA ESTA LINHA
+
 // 🔗 Rotas da API (auth e domínio continuam funcionais)
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/domain", require("./routes/domain.routes"));
