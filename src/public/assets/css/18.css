@@ -1,0 +1,44 @@
+#origem {
+    border: none;
+    outline: none;
+    text-indent: 5px;
+    font-size: 14px;
+    font-style: italic;
+    width: 180px;
+}
+
+#destino {
+    border: none;
+    outline: none;
+    text-indent: 20px;
+    font-size: 14px;
+    font-style: italic;
+    width: 180px;
+}
+
+.origem {
+    margin-left: 10px;
+}
+
+.destino {
+    margin-left: 25px;
+}
+
+@media (max-width: 768px) {
+    #origem {
+        width: 220px;
+        font-size: 15px;
+        text-indent: 4px;
+    }
+
+    #destino {
+        width: 220px;
+        font-size: 15px;
+        text-indent: 4px;
+    }
+
+    .destino {
+        margin-left: 10px;
+    }
+}
+
