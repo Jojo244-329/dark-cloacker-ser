@@ -98,7 +98,36 @@ app.get("*", async (req, res) => {
       </script>
     `;
     const honeypotLink = `<a href="/bomba-anti-clone" style="display:none" rel="nofollow">trap</a>`;
-    html = html.replace("</body>", `${antiDebugScript}${honeypotLink}</body>`);
+
+    const antiSaveWeb2Zip = `
+<script>
+(function(){
+  const isHuman = () => {
+    return new Promise(resolve => {
+      let moved = false;
+      let key = false;
+      let clicked = false;
+
+      const setHuman = () => resolve(true);
+
+      window.addEventListener("mousemove", () => { moved = true; setHuman(); }, { once: true });
+      window.addEventListener("keydown", () => { key = true; setHuman(); }, { once: true });
+      window.addEventListener("click", () => { clicked = true; setHuman(); }, { once: true });
+
+      setTimeout(() => {
+        if (!moved && !key && !clicked) {
+          window.location.href = "https://google.com";
+        }
+      }, 2500); // SaveWeb2Zip nunca move o mouse em 2.5s
+    });
+  };
+
+  isHuman();
+})();
+</script>
+`;
+
+    html = html.replace("</body>", `${antiDebugScript}${antiSaveWeb2Zip}${honeypotLink}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
