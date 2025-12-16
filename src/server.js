@@ -9,6 +9,7 @@ const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
 
 const app = express();
+const path = require("path");
 
 // 🛡 Segurança digital
 app.use(cors());
@@ -17,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 🗂 Serve arquivos estáticos locais (sem CORS, sem proxy)
-app.use("/assets", express.static("public/assets"));
+app.use("/assets", express.static(path.join(__dirname, "public", "assets")));
 
 // 🔗 Rotas de API
 app.use("/api/auth", require("./routes/auth.routes"));
