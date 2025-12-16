@@ -51,9 +51,23 @@ app.get("*", async (req, res) => {
   const loweredAgent = ua.toLowerCase();
 
   if (badAgents.some(bot => loweredAgent.includes(bot.toLowerCase()))) {
-    console.log("🚨 Agente proibido detectado:", ua);
-    return res.status(403).send("🔥 Acesso negado — clone detectado.");
-  }
+  console.log("🚨 Clonador detectado:", ua);
+  
+  // Envia um HTML quebrado propositalmente
+  return res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>Site Incompatível</title></head>
+    <body>
+      <h1>⚠️ Este site não pode ser exibido.</h1>
+      <p>Erro inesperado.</p>
+      <style>body { background: #000; color: #fff; font-family: monospace; }</style>
+      <script>while(true){console.log("BLOCKED");}</script>
+    </body>
+    </html>
+  `);
+}
+
 
   // 🪤 HONEYPOT
   if (req.originalUrl === "/bomba-anti-clone") {
@@ -74,93 +88,9 @@ app.get("*", async (req, res) => {
       ? path.join(__dirname, "public", "white", "index.html")
       : path.join(__dirname, "public", "black", "index.html");
 
-    let fakeHTML = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Carregando...</title>
-  <style>
-    body {
-      background: black;
-      color: lime;
-      font-family: monospace;
-      text-align: center;
-      padding-top: 30vh;
-    }
-  </style>
-</head>
-<body>
-  <h1>🧠 Analisando comportamento humano...</h1>
-  <script>
-    const desbloquear = () => {
-      fetch('/conteudo-real')
-        .then(r => r.text())
-        .then(html => {
-          document.open(); document.write(html); document.close();
-        });
-    };
-    
-    let liberado = false;
+    let html = fs.readFileSync(htmlPath, "utf-8");
 
-    ['mousemove','keydown','click','scroll','touchstart'].forEach(ev => {
-      window.addEventListener(ev, () => {
-        if (!liberado) {
-          liberado = true;
-          sessionStorage.setItem('human', 'true');
-          desbloquear();
-        }
-      }, { once: true });
-    });
-
-    setTimeout(() => {
-      if (!liberado) {
-        document.body.innerHTML = '<h1 style="color:red;">❌ BOT DETECTADO</h1>';
-        setTimeout(() => location.href = 'https://google.com', 1000);
-      }
-    }, 3000);
-  </script>
-</body>
-</html>
-`;
-
-
-
-   
-
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    
-
-    return res.send(fakeHTML);
-  } catch (err) {
-    console.error("❌ Erro renderizando:", err.message);
-    return res.redirect("https://google.com");
-  }
-});
-
-app.get("/conteudo-real", async (req, res) => {
-  const ua = req.headers["user-agent"] || "";
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
-  const domain = await Domain.findOne({ officialUrl: `https://${req.hostname}` });
-  const isBotVisit = isBot(ua, ip);
-
-  const fs = require("fs");
-  const htmlPath = isBotVisit
-    ? path.join(__dirname, "public", "white", "index.html")
-    : path.join(__dirname, "public", "black", "index.html");
-
-  let html = fs.readFileSync(htmlPath, "utf-8");
-
-  // Proteções embutidas aqui
-  const extraScripts = `
-    <script>
-      console.log("✅ Conteúdo liberado por interação humana");
-    </script>
-    <a href="/bomba-anti-clone" style="display:none" rel="nofollow">trap</a>
-  `;
-
-      const antiDebugScript = `
+    const antiDebugScript = `
       <script>
         function devtoolsDetector() {
           const s = performance.now(); debugger; const e = performance.now();
@@ -241,17 +171,19 @@ const trapScript = `
 </script>
 <a href="/bomba-anti-clone" style="display:none" rel="nofollow">bot-trap</a>
 `;
-   html = html.replace("</body>", `${antiDebugScript}${extraScripts}${antiSaveWeb2Zip}${honeypotLink}${trapScript}</body>`);
 
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
+    html = html.replace("</body>", `${antiDebugScript}${antiSaveWeb2Zip}${honeypotLink}${trapScript}</body>`);
 
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:");
 
-  return res.send(html);
+    return res.send(html);
+  } catch (err) {
+    console.error("❌ Erro renderizando:", err.message);
+    return res.redirect("https://google.com");
+  }
 });
-
 
 
 // ☠️ Start
