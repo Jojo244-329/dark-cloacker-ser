@@ -79,13 +79,8 @@ app.use(async (req, res, next) => {
 
     
     // Corrige só se NÃO começar com /assets/
-    html = html.replace(/(src|href)=["'](?!\/assets\/)(\.?\/)?assets\//g, `$1="/assets/`);
+    html = html.replace(/(src|href)=["']((\.\/)?assets\/)/g, `$1="/assets/`);
 
-
-    // Remove CSP original e injeta o nosso CSP satânico
-    html = html.replace(/<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, "");
-    html = html.replace(/<meta[^>]+Content-Security-Policy[^>]+>/gi, "");
-    html = html.replace("</head>", `<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">\n</head>`);
     html = html.replace("</body>", `${antiDebug}</body>`);
 
     // Cabeçalhos finais
