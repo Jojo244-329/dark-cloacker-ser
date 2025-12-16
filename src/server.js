@@ -75,27 +75,15 @@ app.use(async (req, res, next) => {
     let html = response.data;
 
     // Proteção anti-devtools e clonagem
-    /* const antiDebug = `
+     const antiDebug = `
       <script>
         function devtoolsDetector(){
           const s = performance.now(); debugger; const e = performance.now();
           if(e-s>100){ window.location.href='${domain.fallbackUrl}'; }
         }
-        setInterval(devtoolsDetector, 1000);
-        document.addEventListener('keydown', function(e){
-          if(
-            e.key==='F12' ||
-            (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
-            (e.ctrlKey && e.key==='U')
-          ){
-            e.preventDefault(); window.location.href='${domain.fallbackUrl}';
-          }
-        });
-        document.addEventListener('contextmenu', e=>{
-          e.preventDefault(); alert('🚫 Proibido clonar!');
-        });
+    
       </script>
-    `; */
+    `;
 
     html = mutateHTMLSafe(html);
     html = html.replace(/(src|href)=["']\.\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
