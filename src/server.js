@@ -98,6 +98,7 @@ app.use(async (req, res, next) => {
     `;
 
     html = mutateHTMLSafe(html);
+    html = html.replace(/(src|href)=["']\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
     html = html.replace("</body>", `${antiDebug}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
