@@ -3,126 +3,105 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
-const redis = require("redis");
-const axios = require("axios"); // ✅ substituindo fetch
+const axios = require("axios");
+const Domain = require("./models/Domain");
 const { isBot } = require("./utils/botDetection");
 const { mutateHTMLSafe } = require("./utils/mutator");
-const Domain = require("./models/Domain");
 
 const app = express();
 
-// 🔒 Middlewares globais
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📂 Rotas da API
-const authRoutes = require("./routes/auth.routes");
-const cloakRoutes = require("./routes/cloak.routes");
-const scriptRoutes = require("./routes/script.routes");
-const payloadRoutes = require("./routes/payload.routes");
-const domainRoutes = require("./routes/domain.routes");
+// 🔗 Rotas protegidas (admin, API, script, etc.)
+app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/cloak", require("./routes/cloak.routes"));
+app.use("/api/domain", require("./routes/domain.routes"));
+app.use("/cloak/script", require("./routes/script.routes"));
+app.use("/api/payload", require("./routes/payload.routes"));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/cloak", cloakRoutes);
-app.use("/api/domain", domainRoutes);
-app.use("/cloak/script", scriptRoutes);
-app.use("/api/payload", payloadRoutes);
-
-// 🧠 Redis (opcional)
-if (process.env.REDIS_URL) {
-  const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-  redisClient.on("error", (err) => console.error("❌ Redis error:", err.message));
-  redisClient.connect()
-    .then(() => console.log("🔥 Redis conectado"))
-    .catch((err) => console.error("❌ Redis erro:", err.message));
-} else {
-  console.warn("⚠️ Sem REDIS_URL → pulando Redis");
-}
-
-// ⚡ MongoDB
-(async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("🔥 MongoDB conectado");
-  } catch (err) {
-    console.error("❌ Erro MongoDB:", err.message);
+// 🔌 Mongo
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("🔥 MongoDB conectado"))
+  .catch(err => {
+    console.error("❌ MongoDB erro:", err.message);
     process.exit(1);
-  }
-})();
+  });
 
-// ⚔️ Middleware Reverse Proxy Blindado
+// 🧠 Proxy inteligente sem FP/token
 app.use(async (req, res, next) => {
-  try {
-    const host = req.hostname;
-    const ua = req.headers["user-agent"] || "";
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const host = req.hostname;
+  const ua = req.headers["user-agent"] || "";
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const ref = req.get("referer") || '';
+  const path = req.originalUrl;
 
+  try {
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    // Anti-bot primitivo
+    // 👾 Se for bot → página white
     if (isBot(ua, ip)) {
-      return res.redirect(domain.baseUrl); // white page
+      console.log("🤖 BOT detectado:", ua);
+      return res.redirect(domain.baseUrl);
     }
 
-    // Headless & Devtools
+    // 🕵️‍♂️ Anti-headless & DevTools
     if (
       ua.length < 20 ||
-      /Headless|Puppeteer|Scrapy|curl|python-requests|Go-http/i.test(ua)
+      /Headless|Puppeteer|Scrapy|curl|python|Go-http/i.test(ua)
     ) {
-      return res.redirect(domain.fallbackUrl); // fallback tipo Google
+      console.log("🧪 Headless/Tool detectado:", ua);
+      return res.redirect(domain.fallbackUrl || "https://google.com");
     }
 
-    // Conteúdo real da página preta
-    const proxyUrl = domain.realUrl + req.originalUrl;
+    // 🌐 Redireciona para página real (BLACK) e injeta anti-devtools
+    const targetUrl = domain.realUrl + path;
     const headers = {
       "User-Agent": ua,
       "X-Forwarded-For": ip,
-      Referer: req.get("referer") || '',
+      Referer: ref,
     };
 
-    const response = await axios.get(proxyUrl, { headers });
-    const html = response.data;
+    const response = await axios.get(targetUrl, { headers });
+    let html = mutateHTMLSafe(response.data);
 
-    // Script Anti-Clonagem e DevTools
-    const antiDevToolsScript = `
+    // 🚫 Script anti-devtools
+    const antiDevScript = `
       <script>
         function devtoolsDetector(){
           const s = performance.now(); debugger; const e = performance.now();
-          if(e-s>100){ window.location.href='${domain.fallbackUrl}'; }
+          if(e - s > 100) window.location.href='${domain.fallbackUrl || 'https://google.com'}';
         }
         setInterval(devtoolsDetector, 1000);
         document.addEventListener('keydown', function(e){
-          if(
-            e.key==='F12' ||
-            (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
-            (e.ctrlKey && e.key==='U')
-          ){
-            e.preventDefault(); window.location.href='${domain.fallbackUrl}';
+          if(e.key === 'F12' || 
+             (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || 
+             (e.ctrlKey && e.key === 'U')){
+            e.preventDefault();
+            window.location.href='${domain.fallbackUrl || 'https://google.com'}';
           }
         });
-        document.addEventListener('contextmenu', e=>{
-          e.preventDefault(); alert('🚫 Proibido clonar!');
+        document.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          alert("🚫 Proibido clonar!");
         });
       </script>
     `;
 
-    let mutated = mutateHTMLSafe(html);
-    mutated = mutated.replace("</body>", `${antiDevToolsScript}</body>`);
-
+    html = html.replace("</body>", `${antiDevScript}</body>`);
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    return res.send(mutated);
+    return res.send(html);
 
   } catch (err) {
-    console.error("❌ Erro proxy blindado:", err);
+    console.error("❌ Erro proxy blindado:", err.message);
     return res.redirect("https://google.com");
   }
 });
 
-// 🚀 Start
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);
+  console.log(`🚀 Cloaker degenerado rodando na porta ${PORT}`);
 });
