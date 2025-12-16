@@ -75,7 +75,7 @@ app.use(async (req, res, next) => {
     let html = response.data;
 
     // Proteção anti-devtools e clonagem
-    const antiDebug = `
+    /* const antiDebug = `
       <script>
         function devtoolsDetector(){
           const s = performance.now(); debugger; const e = performance.now();
@@ -95,7 +95,7 @@ app.use(async (req, res, next) => {
           e.preventDefault(); alert('🚫 Proibido clonar!');
         });
       </script>
-    `;
+    `; */
 
     html = mutateHTMLSafe(html);
     html = html.replace(/(src|href)=["']\.\/(.*?)["']/g, `$1="${targetUrl}/$2"`);
