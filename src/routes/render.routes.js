@@ -37,7 +37,8 @@ router.get('/:slug', async (req, res) => {
     const blocked = isBotCheck || !fromAd || headless || proxy || !geoOk || !timeOk;
 
     // 🔍 Debug no console
-    console.log("🩻 Checagem visitante:", { isBot, fromAd, headless, proxy, geoOk, timeOk, trusted });
+    console.log("🩻 Checagem visitante:", { isBotCheck, fromAd, headless, proxy, geoOk, timeOk, trusted });
+
 
     const targetUrl = (blocked && !trusted)
       ? domain.baseUrl

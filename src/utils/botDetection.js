@@ -39,8 +39,14 @@ function isBotAdvanced({ userAgent = '', ip = '', fp = '' }) {
   return false;
 }
 
+function isBot(ua, ip = '') {
+  const botRegex = /(bot|crawl|spider|slurp|facebookexternalhit|facebot|googlebot|bingbot|python-requests|Headless|PhantomJS|curl|wget|Go-http)/i;
+  return botRegex.test(ua) || ua.length < 20;
+}
+
 module.exports = {
   isBotByUserAgent,
   isBotByIP,
-  isBotAdvanced
+  isBotAdvanced,
+  isBot
 };
