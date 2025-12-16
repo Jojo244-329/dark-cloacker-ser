@@ -77,9 +77,10 @@ app.use(async (req, res, next) => {
     // 🧬 Mutação: caminhos + CSP + injeções
     html = mutateHTMLSafe(html);
 
-    // Troca caminhos para assets locais
-    html = html.replace(/(src|href)=["']\.?\/?assets\//g, `$1="/assets/`);
-    html = html.replace(/(src|href)=["']\/(.*?)["']/g, `$1="/assets/$2"`);
+    
+    // Corrige só se NÃO começar com /assets/
+    html = html.replace(/(src|href)=["'](?!\/assets\/)(\.?\/)?assets\//g, `$1="/assets/`);
+
 
     // Remove CSP original e injeta o nosso CSP satânico
     html = html.replace(/<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, "");
