@@ -40,49 +40,40 @@ app.use("/api/domain", require("./routes/domain.routes"));
 
 // 🎭 Middleware final de cloaking renderizando HTML local
 app.get("*", async (req, res) => {
+  const ua = req.headers["user-agent"] || "";
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-      // 👁️ Detecta se é um bot
-    const isBotVisit = isBot(ua, ip);
+  // ☠️ BLOQUEIO DE CLONADORES CONHECIDOS
+  const badAgents = [
+    "HTTrack", "webzip", "saveweb2zip", "Teleport", "Website Copier",
+    "Wget", "curl", "python-requests", "httpclient", "Go-http-client"
+  ];
+  const loweredAgent = ua.toLowerCase();
 
-    // 💣☠️ PROTEÇÃO CONTRA HTTrack, SaveWeb2Zip, Wget e afins
-    const badAgents = [
-      "HTTrack", "webzip", "saveweb2zip", "Teleport", "Website Copier",
-      "Wget", "curl", "python-requests", "httpclient", "Go-http-client"
-    ];
-    const loweredAgent = ua.toLowerCase();
+  if (badAgents.some(bot => loweredAgent.includes(bot.toLowerCase()))) {
+    console.log("🚨 Agente proibido detectado:", ua);
+    return res.status(403).send("🔥 Acesso negado — clone detectado.");
+  }
 
-    if (badAgents.some(bot => loweredAgent.includes(bot.toLowerCase()))) {
-      console.log("🚨 Agente proibido detectado:", ua);
-      return res.status(403).send("🔥 Acesso negado — clone detectado.");
-    }
-
-    // 🕸️ Honeypot: se tentar acessar /bomba-anti-clone, redireciona
-    if (req.originalUrl === "/bomba-anti-clone") {
-      console.log("🪤 Honeypot clicado por IP:", ip);
-      return res.redirect("https://google.com");
-    }
-
-
+  // 🪤 HONEYPOT
+  if (req.originalUrl === "/bomba-anti-clone") {
+    console.log("🪤 Honeypot clicado por IP:", ip);
+    return res.redirect("https://google.com");
+  }
 
   try {
     const host = req.hostname;
-    const ua = req.headers["user-agent"] || "";
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    // 📦 Busca o domínio no Mongo (opcional — pode tirar se quiser fixar os paths)
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
-    // 👁️ Detecta se é um bot
     const isBotVisit = isBot(ua, ip);
 
-    // 📍 Define o caminho local do HTML a ser servido
+    const fs = require("fs");
     const htmlPath = isBotVisit
       ? path.join(__dirname, "public", "white", "index.html")
       : path.join(__dirname, "public", "black", "index.html");
 
-    // 💣 Anti-devtools: injetado no HTML antes de enviar (opcional)
-    const fs = require("fs");
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     const antiDebugScript = `
@@ -91,9 +82,8 @@ app.get("*", async (req, res) => {
           const s = performance.now(); debugger; const e = performance.now();
           if (e - s > 100) location.href = '${domain.fallbackUrl}';
         }
-        setInterval(devtoolsDetector, 2000);
-          setInterval(devtoolsDetector, 1000);
-         document.addEventListener('keydown', function(e){
+        setInterval(devtoolsDetector, 1000);
+        document.addEventListener('keydown', function(e){
           if(
             e.key==='F12' ||
             (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
@@ -107,22 +97,20 @@ app.get("*", async (req, res) => {
         });
       </script>
     `;
-
-    const honeypotLink = ` <a href="/bomba-anti-clone" style="display:none" rel="nofollow">bot-trap</a>`;
-    
+    const honeypotLink = `<a href="/bomba-anti-clone" style="display:none" rel="nofollow">trap</a>`;
     html = html.replace("</body>", `${antiDebugScript}${honeypotLink}</body>`);
 
-    // 🧬 Cabeçalhos padrão
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:");
 
     return res.send(html);
   } catch (err) {
-    console.error("❌ Erro ao renderizar página local:", err.message);
+    console.error("❌ Erro renderizando:", err.message);
     return res.redirect("https://google.com");
   }
 });
+
 
 // ☠️ Start
 const PORT = process.env.PORT || 8080;
