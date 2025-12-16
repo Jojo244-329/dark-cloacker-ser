@@ -79,7 +79,9 @@ app.use(async (req, res, next) => {
 
     
     // Corrige só se NÃO começar com /assets/
-    html = html.replace(/(src|href)=["']((\.\/)?assets\/)/g, `$1="/assets/`);
+    // Corrige apenas caminhos que não começam com / ou http
+    html = html.replace(/(src|href)=["'](?!https?:\/\/|\/)(\.?\/)?assets\//g, `$1="/assets/`);
+
 
     html = html.replace("</body>", `${antiDebug}</body>`);
 
