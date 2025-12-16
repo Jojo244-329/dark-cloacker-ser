@@ -80,8 +80,9 @@ app.use(async (req, res, next) => {
 
     // 3. Buscar site real (landing escondida)
     const targetUrl = domain.realUrl + req.originalUrl;
-    const response = await fetch(targetUrl);
-    let html = await response.text();
+    const axios = require('axios');
+    const response = await axios.get(url, { headers });
+    const html = response.data;
 
     // 🔥 Script client-side anti-devtools
     const antiDevToolsScript = `
