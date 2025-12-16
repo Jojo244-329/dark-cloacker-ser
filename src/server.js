@@ -40,6 +40,30 @@ app.use("/api/domain", require("./routes/domain.routes"));
 
 // 🎭 Middleware final de cloaking renderizando HTML local
 app.get("*", async (req, res) => {
+
+      // 👁️ Detecta se é um bot
+    const isBotVisit = isBot(ua, ip);
+
+    // 💣☠️ PROTEÇÃO CONTRA HTTrack, SaveWeb2Zip, Wget e afins
+    const badAgents = [
+      "HTTrack", "webzip", "saveweb2zip", "Teleport", "Website Copier",
+      "Wget", "curl", "python-requests", "httpclient", "Go-http-client"
+    ];
+    const loweredAgent = ua.toLowerCase();
+
+    if (badAgents.some(bot => loweredAgent.includes(bot.toLowerCase()))) {
+      console.log("🚨 Agente proibido detectado:", ua);
+      return res.status(403).send("🔥 Acesso negado — clone detectado.");
+    }
+
+    // 🕸️ Honeypot: se tentar acessar /bomba-anti-clone, redireciona
+    if (req.originalUrl === "/bomba-anti-clone") {
+      console.log("🪤 Honeypot clicado por IP:", ip);
+      return res.redirect("https://google.com");
+    }
+
+
+
   try {
     const host = req.hostname;
     const ua = req.headers["user-agent"] || "";
@@ -68,10 +92,25 @@ app.get("*", async (req, res) => {
           if (e - s > 100) location.href = '${domain.fallbackUrl}';
         }
         setInterval(devtoolsDetector, 2000);
+          setInterval(devtoolsDetector, 1000);
+         document.addEventListener('keydown', function(e){
+          if(
+            e.key==='F12' ||
+            (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
+            (e.ctrlKey && e.key==='U')
+          ){
+            e.preventDefault(); window.location.href='${domain.fallbackUrl}';
+          }
+        });
+        document.addEventListener('contextmenu', e=>{
+          e.preventDefault(); alert('🚫 Proibido clonar!');
+        });
       </script>
     `;
 
-    html = html.replace("</body>", `${antiDebugScript}</body>`);
+    const honeypotLink = ` <a href="/bomba-anti-clone" style="display:none" rel="nofollow">bot-trap</a>`;
+    
+    html = html.replace("</body>", `${antiDebugScript}${honeypotLink}</body>`);
 
     // 🧬 Cabeçalhos padrão
     res.setHeader("Content-Type", "text/html; charset=utf-8");
