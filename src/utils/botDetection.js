@@ -40,8 +40,23 @@ function isBotAdvanced({ userAgent = '', ip = '', fp = '' }) {
 }
 
 function isBot(userAgent = '', ip = '') {
+  // Normalize
+  const ua = userAgent.toLowerCase();
+
+  // 1. Regex simples de bot
   const botRegex = /(bot|crawl|spider|facebook|pinterest|slack|monitor|scan|headless|wget|python|go-http)/i;
-  return botRegex.test(userAgent);
+  if (botRegex.test(ua)) return true;
+
+  // 2. Lista negra de User-Agents
+  if (userAgentBots.some(bot => ua.includes(bot.toLowerCase()))) return true;
+
+  // 3. Padrões suspeitos
+  if (suspiciousPatterns.test(ua)) return true;
+
+  // 4. IPs bloqueados
+  if (blockedIPs.some(blocked => ip.startsWith(blocked))) return true;
+
+  return false; // Se passar por tudo, é humano
 }
 
 module.exports = {
