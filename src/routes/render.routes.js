@@ -28,12 +28,13 @@ router.get('/:slug', async (req, res) => {
     const timeOk = true;
     const proxy = false;
     const headless = false;
-    const isBot = false;
+    const isBotCheck = false;
+
 
     const exists = await Fingerprint.findOne({ fp, ip, userAgent });
     const trusted = exists || (token === 'chave-compartilhamento-segura');
 
-    const blocked = isBot || !fromAd || headless || proxy || !geoOk || !timeOk;
+    const blocked = isBotCheck || !fromAd || headless || proxy || !geoOk || !timeOk;
 
     // 🔍 Debug no console
     console.log("🩻 Checagem visitante:", { isBot, fromAd, headless, proxy, geoOk, timeOk, trusted });
