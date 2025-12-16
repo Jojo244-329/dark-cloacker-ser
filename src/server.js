@@ -127,7 +127,38 @@ app.get("*", async (req, res) => {
 </script>
 `;
 
-    html = html.replace("</body>", `${antiDebugScript}${antiSaveWeb2Zip}${honeypotLink}</body>`);
+const trapScript = `
+<script>
+(function(){
+  let humano = false;
+
+  const liberador = () => {
+    humano = true;
+    sessionStorage.setItem('liberado', 'true');
+  };
+
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(ev => {
+    window.addEventListener(ev, liberador, { once: true });
+  });
+
+  setTimeout(() => {
+    const liberado = sessionStorage.getItem('liberado');
+    if (!liberado) {
+      document.body.innerHTML = '<h1 style="color:red;text-align:center;margin-top:40vh;">🔥 ACESSO NEGADO — CLONE DETECTADO 🔥</h1>';
+      setTimeout(() => window.location.href = "https://google.com", 1500);
+    }
+  }, 2000); // espera 2s por interação humana
+
+  // Anti devtools
+  const d = () => { const t = performance.now(); debugger; return performance.now() - t > 100; };
+  setInterval(() => { if (d()) location.href = "https://google.com"; }, 1500);
+
+})();
+</script>
+<a href="/bomba-anti-clone" style="display:none" rel="nofollow">bot-trap</a>
+`;
+
+    html = html.replace("</body>", `${antiDebugScript}${antiSaveWeb2Zip}${honeypotLink}${trapScript}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
