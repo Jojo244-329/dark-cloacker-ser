@@ -1,0 +1,16 @@
+{
+    "name": "lib/pix",
+    "autoload": {
+        "psr-4": {
+            "Lib\\Pix\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "radi"
+        }
+    ],
+    "require": {
+        "chillerlan/php-qrcode": "^4.3"
+    }
+}
