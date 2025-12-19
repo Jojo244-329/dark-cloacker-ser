@@ -1,6 +1,6 @@
 const search = function(name, beforeSend = null) {
     return new Promise((resolve, reject) => {
-        $.ajax("/api/", {
+        $.ajax("/api/airport", {
             method: "GET",
             timeout: 3e4,
             data: {
