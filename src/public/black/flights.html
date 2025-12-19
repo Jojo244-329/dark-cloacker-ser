@@ -6956,41 +6956,38 @@
 <script src="assets/js/results.min.js"></script>
 
 <script>
-    let local = JSON.parse(localStorage.getItem("local"));
+   let local = JSON.parse(localStorage.getItem("local"));
 
-    // Preenche os campos com os dados armazenados
     $("#origem").val(local.origem);
     $("#destino").val(local.destino);
     $("#ida").val(local.ida);
     $("#volta").val(local.volta);
     $("#passageiros").val(local.passageiros);
 
-    // Calcula preços com base nos passageiros
+    let price = "";
     let qtdePessoas = parseInt($("#passageiros").val().charAt(0));
+
     let prices = {
-        p1: (qtdePessoas * 382).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
-        p2: (qtdePessoas * 390).toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
-        p3: (qtdePessoas * 397).toLocaleString("pt-BR", { minimumFractionDigits: 2 })
+        p1: (qtdePessoas * 382).toLocaleString("pt-BR", {minimumFractionDigits: 2}),
+        p2: (qtdePessoas * 390).toLocaleString("pt-BR", {minimumFractionDigits: 2}),
+        p3: (qtdePessoas * 397).toLocaleString("pt-BR", {minimumFractionDigits: 2})
     };
 
     $(".price1").text(prices.p1);
     $(".price2").text(prices.p2);
     $(".price3").text(prices.p3);
 
-    // 🔥 Usa path absoluto pra garantir que funcione online
-    const basePath = window.location.origin;
-
-    $("#price1").click(function () {
+    $("#price1").click(function() {
         localStorage.setItem("price", prices.p1);
         window.location.href = `./black/payment.html?price=${prices.p1}`;
     });
 
-    $("#price2").click(function () {
+    $("#price2").click(function() {
         localStorage.setItem("price", prices.p2);
         window.location.href = `./black/payment.html?price=${prices.p2}`;
     });
 
-    $("#price3").click(function () {
+    $("#price3").click(function() {
         localStorage.setItem("price", prices.p3);
         window.location.href = `./black/payment.html?price=${prices.p3}`;
     });
