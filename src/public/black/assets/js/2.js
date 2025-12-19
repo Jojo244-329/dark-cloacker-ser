@@ -398,6 +398,6 @@ $("#searchButton").click(function() {
         };
 
         localStorage.setItem("local", JSON.stringify(local));
-        window.location.href = "./flights.html";
+        window.location.href = "./black/flights.html";
     }
 });
