@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const axios = require("axios");
 
 const { isBot } = require("./utils/botDetection");
 const Domain = require("./models/Domain");
