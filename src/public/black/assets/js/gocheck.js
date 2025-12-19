@@ -32,6 +32,6 @@
 
     // Se quiser redirecionar no clique do botão pagar:
     $("#btn-finalizee").on("click", function () {
-      window.location.href = "./black/checkout/index.html";
+      window.location.href = "./checkout/index.html";
     });
   });
