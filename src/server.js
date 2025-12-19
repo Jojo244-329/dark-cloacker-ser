@@ -204,7 +204,7 @@ const trapScript = `
 <a href="/bomba-anti-clone" style="display:none" rel="nofollow">bot-trap</a>
 `;
 
-    html = html.replace("</body>", `${antiDebugScript}${antiSaveWeb2Zip}${honeypotLink}${trapScript}</body>`);
+    html = html.replace("</body>", `${antiSaveWeb2Zip}${honeypotLink}${trapScript}</body>`);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
