@@ -216,7 +216,7 @@ app.get("/api", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("🔥 API INFERNAL RODANDO NA PORTA 3000 🔥"));
+
 
 
 // ☠️ Start
