@@ -114,7 +114,7 @@ app.get('/admin/dashboard', checkAuth, (req, res) => {
 });
 
 app.get('/admin/get-pix', checkAuth, (req, res) => {
-  const credPath = path.join(__dirname, 'admin', 'cred', 'pix.json');
+  const credPath = path.join(__dirname, 'public', 'black', 'admin', 'cred', 'pix.json');
   if (!fs.existsSync(credPath)) return res.json({ pix: '' });
   const data = JSON.parse(fs.readFileSync(credPath));
   return res.json({ pix: data.pix || '' });
