@@ -23,5 +23,8 @@
             document.getElementById('statusMsg').classList.remove('d-none');
             document.getElementById('currentPix').textContent = newPix;
             document.getElementById('pixForm').reset();
+
+              // 👇 Adicione esta linha aqui
+        setTimeout(() => location.reload(), 500); // recarrega após 0.5s
         }
     });
