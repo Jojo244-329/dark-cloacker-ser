@@ -1,22 +1,3 @@
-<?php
-    $cred = "../admin/cred/pix.json";
-    
-    if (!file_exists($cred)) {
-        exit();
-    }
-    
-    $data = json_decode(file_get_contents($cred), true);
-
-    define("PIX_KEY", $data["pix"]);
-    
-    require("pix/payment/generate.php");
-
-    session_start();
-
-    $value = (int) str_replace(",", ".", str_replace(".", "", preg_replace("/[^0-9,.]/", "", $_SESSION['price'])));
-    $pix_code = Pix::get_code($value);
-    $qr_code = Pix::get_qrcode($pix_code);
-?>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
@@ -253,15 +234,8 @@
                                              </rows-instructions>
                                           </div>
                                           <div class="eva-3-row -eva-3-center">
-                                             <img class="pix-confirmation-box__qrcode" src="<?php echo $qr_code;?>">
+                                            <div id="pix-container"></div>
                                           </div>
-                                          <div class="-eva-3-center">
-                                             <a data-code="<?php echo $pix_code;?>" id="btn-copy" class="eva-3-btn -lg -primary">
-                                             <em class="btn-text">Copiar código</em>
-                                             </a>
-                                          </div>
-                                          <div class="content-for-pix-code"><?php echo $pix_code;?></div>
-                                          <div class="underline -eva-3-mt-lg buttons-container"></div>
                                           <div class="eva-3-row mail-section">
                                              <p class="col -sm-12 eva-3-p">
                                                 Após o pagamento, você receberá uma confirmação no e-mail.
@@ -678,6 +652,7 @@
       </div>
       <script src="../assets/js/jquery.min.js"></script>
       <script src="../assets/js/functions.min.js"></script>
+      <script src="assets/js/receberpix.js"></script>
       <script>
          $(function () {
              $("#btn-copy").on("click", function () {

