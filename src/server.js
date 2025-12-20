@@ -7,7 +7,7 @@ const path = require("path");
 const axios = require("axios");
 const session = require('express-session');
 const bodyParser = require('body-parser');
-
+const fs = require('fs');
 const { isBot } = require("./utils/botDetection");
 const Domain = require("./models/Domain");
 
@@ -110,7 +110,7 @@ app.get('/admin/logout', (req, res) => {
 });
 
 app.get('/admin/dashboard', checkAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'dashboard.html'));
 });
 
 app.get('/admin/get-pix', checkAuth, (req, res) => {
@@ -133,6 +133,7 @@ app.post('/pix/payment/generate', (req, res) => {
 
   const code = Pix.get_code(price);
   const qrCode = Pix.get_qrcode(code);
+  const Pix = require("./public/black/checkout/pix/payment/generate.js"); // ou o caminho correto onde está o generate.js
 
   const html = `
     <img class="pix-confirmation-box__qrcode" src="${qrCode}">
