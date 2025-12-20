@@ -13,7 +13,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             const result = await response.json();
 
             if (result.success) {
-                window.location.href = '/admin/dashboard';
+                window.location.href = '.black/admin/dashboard.html';
             } else {
                 document.getElementById('errorMsg').classList.remove('d-none');
             }
