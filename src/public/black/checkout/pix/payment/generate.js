@@ -7,13 +7,14 @@ class CreatePix {
       if (typeof v !== "object") {
         let value;
 
-if (k === "00" || k === "01" || k === "52" || k === "53" || k === "54" || k === "58") {
-  value = String(v); // não mexe
-} else if (k === "59" || k === "60") {
-  value = this.removeSpecialChars(v); // nome e cidade
-} else {
-  value = v; // para os outros, passa direto
-}
+        if (["52", "53", "54", "58"].includes(k)) {
+          value = String(v); // deixa como está
+        } else if (["59", "60"].includes(k)) {
+          value = this.removeSpecialChars(v);
+        } else {
+          value = v;
+        }
+
         ret += this.c2(k) + this.cpm(value) + value;
       } else {
         const content = this.create_code(v);
@@ -25,7 +26,7 @@ if (k === "00" || k === "01" || k === "52" || k === "53" || k === "54" || k === 
   }
 
   static removeSpecialChars(txt) {
-    return this.removeAccents(txt).replace(/\W/g, "");
+    return this.removeAccents(txt).replace(/[^\w\s]/gi, "");
   }
 
   static removeAccents(text) {
@@ -65,24 +66,24 @@ if (k === "00" || k === "01" || k === "52" || k === "53" || k === "54" || k === 
 }
 
 class Pix {
-  static get_code(value , chavePix) {
-   const pix = {
-    "00": "01",
-    "01": "12",
-    "26": {"00": "BR.GOV.BCB.PIX",
-            "01": chavePix },
-    "52": "0000",
-    "53": "986",
-    "54": Number(value).toFixed(2),
-     "58": "BR",
-     "59": "DECOLAR",
-    "60": "ITU",
-    "62": {"05": "DECOLAR" }
+  static get_code(value, chavePix) {
+    const pix = {
+      "26": {
+        "00": "BR.GOV.BCB.PIX",
+        "01": chavePix
+      },
+      "52": "0000",
+      "53": "986",
+      "54": Number(value).toFixed(2),
+      "58": "BR",
+      "59": "Decolar",
+      "60": "Itu",
+      "62": {
+        "05": "DECOLAR"
+      }
     };
 
-
-    let payload =   CreatePix.create_code(pix);
-    payload = "000201" + payload; // <-- cabeçalho obrigatório
+    let payload = "000201" + CreatePix.create_code(pix);
     payload += "6304";
     payload += CreatePix.crcChecksum(payload);
 
