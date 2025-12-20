@@ -653,20 +653,5 @@
       <script src="../assets/js/jquery.min.js"></script>
       <script src="../assets/js/functions.min.js"></script>
       <script src="assets/js/receberpix.js"></script>
-      <script>
-         $(function () {
-             $("#btn-copy").on("click", function () {
-                 let code = $(this).data("code");
-                 copyContent(code).then(function () {
-                     $("#btn-copy .btn-text").html("Copiado!");
-                     $("#btn-copy").addClass("success");
-                     setTimeout(function () {
-                         $("#btn-copy .btn-text").html("Copiar código");
-                         $("#btn-copy").removeClass("success");
-                     }, 3000);
-                 })
-             })
-         })
-      </script>
    </body>
 </html>

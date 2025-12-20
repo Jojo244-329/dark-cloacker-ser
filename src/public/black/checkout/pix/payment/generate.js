@@ -87,3 +87,5 @@ class Pix {
     return `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(pix_code)}`;
   }
 }
+
+module.exports = Pix;
