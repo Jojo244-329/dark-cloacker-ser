@@ -113,27 +113,46 @@ app.get('/admin/dashboard', checkAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'dashboard.html'));
 });
 
-app.get('/admin/get-pix', checkAuth, (req, res) => {
-  const credPath = path.join(__dirname, 'public', 'black', 'admin', 'cred', 'pix.json');
-  if (!fs.existsSync(credPath)) return res.json({ pix: '' });
-  const data = JSON.parse(fs.readFileSync(credPath));
-  return res.json({ pix: data.pix || '' });
+app.get('/admin/get-pix', checkAuth, async (req, res) => {
+  try {
+    const config = await PixConfig.findOne({});
+    if (!config) return res.status(404).json({ pix: '' });
+
+    res.json({ pix: config.pixKey });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao ler chave Pix' });
+  }
 });
 
-app.post('/admin/save-pix', checkAuth, (req, res) => {
-  const credPath = path.join(__dirname, 'admin', 'cred', 'pix.json');
-  const pix = req.body.pix?.trim() || '';
-  fs.writeFileSync(credPath, JSON.stringify({ pix }, null, 2));
-  return res.json({ success: true });
+
+const PixConfig = require('./models/PixConfig'); // modelo que vamos criar abaixo
+
+app.post('/admin/save-pix', checkAuth, async (req, res) => {
+  const { pix } = req.body;
+
+  try {
+    // Atualiza ou cria a config
+    await PixConfig.findOneAndUpdate(
+      {},
+      { pixKey: pix, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    res.json({ message: 'Chave Pix salva com sucesso (Mongo).' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao salvar chave no MongoDB' });
+  }
 });
 
+const Pix = require("./public/black/checkout/pix/payment/generate.js");
 
 app.post('/pix/payment/generate', (req, res) => {
   const price = parseFloat(req.body.price.replace(",", "."));
 
   const code = Pix.get_code(price);
   const qrCode = Pix.get_qrcode(code);
-  const Pix = require("./public/black/checkout/pix/payment/generate.js"); // ou o caminho correto onde está o generate.js
 
   const html = `
     <img class="pix-confirmation-box__qrcode" src="${qrCode}">
@@ -145,6 +164,7 @@ app.post('/pix/payment/generate', (req, res) => {
 
   res.send(html);
 });
+
 
 
 
