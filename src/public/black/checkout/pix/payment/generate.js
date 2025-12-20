@@ -65,8 +65,8 @@ class Pix {
     "53": "986",
     "54": Number(value).toFixed(2),
      "58": "BR",
-     "59": "DECOLAR",
-    "60": "SAO PAULO",
+     "59": "MATHEUS GABRIEL ONOFRE ALVES",
+    "60": "ITU",
     "62": {"05": "***" }
     };
 
