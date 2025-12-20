@@ -31,7 +31,7 @@
     }
 
     // Se quiser redirecionar no clique do botão pagar:
-   document.getElementById("btn-finalize").addEventListener("click", function () {
+   document.getElementById("btn-finalizee").addEventListener("click", function () {
     const amountSpan = document.querySelector("#chk-total-price .amount");
     const price = amountSpan ? amountSpan.textContent.trim() : null;
 
