@@ -31,7 +31,16 @@
     }
 
     // Se quiser redirecionar no clique do botão pagar:
-    $("#btn-finalizee").on("click", function () {
-      window.location.href = ".black/checkout/index.html";
-    });
+   document.getElementById("btn-finalize").addEventListener("click", function () {
+    const amountSpan = document.querySelector("#chk-total-price .amount");
+    const price = amountSpan ? amountSpan.textContent.trim() : null;
+
+    if (price) {
+        localStorage.setItem("price", price);
+        window.location.href = "/black/checkout/index.html";
+    } else {
+        alert("Erro: preço não encontrado!");
+    }
+});
+
   });
