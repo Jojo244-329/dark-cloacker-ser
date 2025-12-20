@@ -60,19 +60,14 @@ class Pix {
   static get_code(value , chavePix) {
    const pix = {
     "00": "01",
-    "26": {
-    "00": "BR.GOV.BCB.PIX",
-    "01": chavePix
-    },
+    "26": {"00": "BR.GOV.BCB.PIX","01": chavePix },
     "52": "0000",
     "53": "986",
     "54": Number(value).toFixed(2),
      "58": "BR",
      "59": "DECOLAR",
     "60": "SAO PAULO",
-    "62": {
-    "05": "***"
-        }
+    "62": {"05": "***" }
     };
 
 

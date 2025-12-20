@@ -1,5 +1,12 @@
 const price = localStorage.getItem("price");
 
+  // Atualiza o valor na tela (caso precise exibir)
+  const priceSpan = document.querySelector(".package-price-value");
+  
+  if (priceSpan) {
+    priceSpan.textContent = `R$ ${price}`;
+  }
+
 if (price) {
   fetch("/pix/payment/generate", {
     method: "POST",
