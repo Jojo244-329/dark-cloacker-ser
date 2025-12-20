@@ -66,7 +66,7 @@ class Pix {
     },
     "52": "0000",
     "53": "986",
-    "54": parseFloat(value),
+    "54": Number(value).toFixed(2),
      "58": "BR",
      "59": "DECOLAR",
     "60": "SAO PAULO",
