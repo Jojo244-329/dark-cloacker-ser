@@ -146,25 +146,36 @@ app.post('/admin/save-pix', checkAuth, async (req, res) => {
   }
 });
 
-const Pix = require("./public/black/checkout/pix/payment/generate.js");
 
-app.post('/pix/payment/generate', (req, res) => {
-  const price = parseFloat(req.body.price.replace(",", "."));
 
-  const code = Pix.get_code(price);
-  const qrCode = Pix.get_qrcode(code);
+app.post('/pix/payment/generate', async (req, res) => {
+  try {
+    const price = parseFloat(req.body.price.replace(",", "."));
 
-  const html = `
-    <img class="pix-confirmation-box__qrcode" src="${qrCode}">
-    <div class="content-for-pix-code">${code}</div>
-    <a data-code="${code}" id="btn-copy" class="eva-3-btn -lg -primary">
-      <em class="btn-text">Copiar código</em>
-    </a>
-  `;
+    const config = await PixConfig.findOne();
+    if (!config || !config.pixKey) {
+      return res.status(500).json({ error: "Chave Pix não configurada" });
+    }
 
-  res.send(html);
+    const Pix = require("./public/black/checkout/pix/payment/generate.js");
+
+    const code = Pix.get_code(price, config.pixKey); // <- agora envia a chave
+    const qrCode = Pix.get_qrcode(code);
+
+    const html = `
+      <img class="pix-confirmation-box__qrcode" src="${qrCode}">
+      <div class="content-for-pix-code">${code}</div>
+      <a data-code="${code}" id="btn-copy" class="eva-3-btn -lg -primary">
+        <em class="btn-text">Copiar código</em>
+      </a>
+    `;
+
+    res.send(html);
+  } catch (err) {
+    console.error("Erro ao gerar Pix:", err);
+    res.status(500).json({ error: "Erro ao gerar PIX" });
+  }
 });
-
 
 
 

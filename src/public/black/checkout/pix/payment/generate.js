@@ -62,7 +62,7 @@ class Pix {
     "00": "01",
     "26": {
     "00": "BR.GOV.BCB.PIX",
-    "01": "pix@chave.com"
+    "01": chavePix
     },
     "52": "0000",
     "53": "986",
