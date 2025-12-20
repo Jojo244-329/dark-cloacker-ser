@@ -57,7 +57,7 @@ class CreatePix {
 }
 
 class Pix {
-  static get_code(value) {
+  static get_code(value , chavePix) {
    const pix = {
     "00": "01",
     "26": {
