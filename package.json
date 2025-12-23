@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.3",
     "node-fetch": "^3.3.2",
+    "qrcode": "^1.4.4",
     "redis": "^4.7.1",
     "uuid": "^9.0.1"
   },
