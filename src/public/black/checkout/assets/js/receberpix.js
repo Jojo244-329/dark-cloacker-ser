@@ -10,24 +10,35 @@ const price = localStorage.getItem("price");
 if (price) {
   fetch("/pix/payment/generate", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ price: price })
   })
-    .then(res => {
-      if (!res.ok) throw new Error("Erro ao gerar PIX");
-      return res.text();
-    })
-    .then(html => {
-      document.getElementById("pix-container").innerHTML = html;
+    .then(res => res.json())
+    .then(data => {
+      const payload = data.payload;
 
-      // Ativa botão de copiar, se existir
+      // Mostra o código como texto
+      document.getElementById("pix-container").innerHTML = `
+        <div class="content-for-pix-code">${payload}</div>
+        <a data-code="${payload}" id="btn-copy" class="eva-3-btn -lg -primary">
+          <em class="btn-text">Copiar código</em>
+        </a>
+      `;
+
+      // Cria o canvas com o QR Code
+      QRCode.toCanvas(payload, { width: 256 }, function (err, canvas) {
+        if (!err) {
+          document.getElementById("pix-container").prepend(canvas);
+        } else {
+          console.error("Erro QR:", err);
+        }
+      });
+
+      // Ativa botão copiar
       const btn = document.getElementById("btn-copy");
       if (btn) {
         btn.addEventListener("click", () => {
-          const code = btn.getAttribute("data-code");
-          navigator.clipboard.writeText(code).then(() => {
+          navigator.clipboard.writeText(payload).then(() => {
             btn.querySelector("em").textContent = "Código copiado!";
             btn.classList.add("success");
             setTimeout(() => {
@@ -38,10 +49,11 @@ if (price) {
         });
       }
     })
-    .catch(error => {
-      console.error("Erro ao carregar QR Code:", error);
+    .catch(err => {
+      console.error("Erro Pix:", err);
       document.getElementById("pix-container").innerHTML = "<p>Erro ao gerar o código Pix.</p>";
     });
-} else {
+}
+ else {
   document.getElementById("pix-container").innerHTML = "<p>Preço não encontrado.</p>";
 }
