@@ -306,7 +306,6 @@ const trapScript = `
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://chart.googleapis.com data:; font-src 'self';");
 
 
     return res.send(html);
