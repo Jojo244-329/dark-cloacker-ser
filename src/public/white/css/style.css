@@ -1,0 +1,555 @@
+/*
+Theme Name: Vieira e Brandão Advogados Associados
+Theme URI: https://gitlab.com/PiresLabs/sites/vieirabrandao
+Author: Leonardo Pires from PiresLabs.com
+Author URI: https://leonardopires.dev/
+Description: WordPress Theme desenvolvido para o site do escritório de advocacia Vieira e Brandão Advogados Associados.
+Tags: website, bootstrap, responsive
+Version: 1.0.0
+Requires at least: 5.6
+Tested up to: 5.6
+Requires PHP: 7.4
+Text Domain: vieirabrandao
+*/
+
+@font-face {
+  font-family: "Blair ITC Standard";
+  src: url("../fonts/blair-itc-std.otf");
+}
+@font-face {
+  font-family: "Blair ITC Light";
+  src: url("../fonts/blair-itc-light.otf");
+}
+@font-face {
+  font-family: "Blair ITC Medium";
+  src: url("../fonts/blair-itc-medium.ttf");
+}
+@font-face {
+  font-family: "Blair ITC Bold";
+  src: url("../fonts/blair-itc-bold.ttf");
+}
+@font-face {
+  font-family: "Segoe UI Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Segoe UI"), url("../fonts/segoe-ui-regular.woff") format("woff");
+}
+@font-face {
+  font-family: "Segoe UI Italic";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Segoe UI Italic"), url("../fonts/segoe-ui-italic.woff") format("woff");
+}
+@font-face {
+  font-family: "Segoe UI Bold";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Segoe UI Bold"), url("../fonts/segoe-ui-bold.woff") format("woff");
+}
+@font-face {
+  font-family: "Segoe UI Bold Italic";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Segoe UI Bold Italic"), url("../fonts/segoe-ui-bold-italic.woff") format("woff");
+}
+*, p, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shadow-bottom {
+  box-shadow: 0 3px 50px #080A0D;
+}
+
+.shadow-around {
+  box-shadow: 0 0 25px #080A0D;
+}
+
+body {
+  color: #080A0D;
+  background-color: #f5f5f5;
+  font-family: "Segoe UI Regular";
+}
+
+a:link {
+  color: #906D43;
+  text-decoration: none;
+}
+a:visited {
+  color: #906D43;
+  text-decoration: none;
+}
+a:link:active {
+  color: #906D43;
+  text-decoration: none;
+}
+a:visited:active {
+  color: #906D43;
+  text-decoration: none;
+}
+
+#page-wrapper {
+  min-height: 100vh;
+}
+
+#header {
+  color: #f5f5f5;
+}
+#header a {
+  color: #f5f5f5;
+}
+
+#top-main-bar {
+  padding: 0.5rem 0;
+  background-color: #010000;
+  font-size: 0.8rem;
+}
+#top-main-bar i {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+@media (min-width: 992px) {
+  #top-main-bar i {
+    font-size: 1.2rem;
+  }
+  #top-main-bar .col-lg-4:not(:first-child):not(:last-child) {
+    border-left: 1px solid rgba(245, 245, 245, 0.3);
+    border-right: 1px solid rgba(245, 245, 245, 0.3);
+  }
+}
+#top-main-menu {
+  padding: 1rem 0;
+  background-color: #010000;
+}
+#top-main-menu #main-logo-wrapper {
+  margin-bottom: 1rem;
+}
+#top-main-menu #main-logo-wrapper img.logo-full {
+  width: 210px;
+}
+#top-main-menu .navbar-toggler {
+  border: 1px solid #CEAC52;
+}
+#top-main-menu .navbar-toggler:focus {
+  box-shadow: none !important;
+}
+#top-main-menu .navbar-toggler i {
+  color: #CEAC52;
+}
+#top-main-menu .menu-menu-principal-container .navbar-nav .menu-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(144, 109, 67, 0.3);
+}
+#top-main-menu .menu-menu-principal-container .navbar-nav .menu-item a {
+  padding: 0.5rem 1rem;
+  color: #CEAC52;
+  font-family: "Blair ITC Light";
+}
+
+@media (min-width: 768px) {
+  #top-main-menu .navbar-toggler {
+    display: none;
+  }
+  #top-main-menu .menu-menu-principal-container .navbar-nav .menu-item {
+    border: none !important;
+  }
+  #top-main-menu .menu-menu-principal-container .navbar-nav .menu-item a:hover {
+    border-top: 1px solid #906D43;
+    border-bottom: 1px solid #906D43;
+  }
+}
+#highlighted-content {
+  margin: 1rem 0;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao {
+  padding: 1rem 1.5rem;
+  color: #906D43;
+  background-color: #181E26;
+  min-height: 260px;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-icone {
+  margin-bottom: 1rem;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-icone i {
+  font-size: 2.5rem;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-nome {
+  margin-bottom: 1.5rem;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-nome h3 {
+  text-align: center;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-family: "Blair ITC Standard";
+  font-size: 1.5rem;
+  border-top: 1px solid rgba(144, 109, 67, 0.4);
+  border-bottom: 1px solid rgba(144, 109, 67, 0.4);
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-descricao {
+  display: none;
+  color: #f5f5f5;
+  margin-bottom: 1.5rem;
+}
+#highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-link {
+  margin-bottom: 2rem;
+}
+#highlighted-content #destaque-areas-atuacao .direito-tributario {
+  background-image: url("../images/bg-direito-tributario.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#highlighted-content #destaque-areas-atuacao .direito-bancario {
+  background-image: url("../images/bg-direito-bancario.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#highlighted-content #destaque-areas-atuacao .direito-saude {
+  background-image: url("../images/bg-direito-saude.jpg");
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#highlighted-content .post-wrapper {
+  margin: 2rem 1rem;
+}
+#highlighted-content .post-wrapper .post-title {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+}
+#highlighted-content .post-wrapper .post-title h3 {
+  text-align: center;
+  margin-bottom: 2rem;
+  display: inline-block;
+  color: #906D43;
+  padding: 0.5rem 1.5rem;
+  font-family: "Blair ITC Standard";
+  font-size: 1.5rem;
+  border-top: 1px solid rgba(144, 109, 67, 0.4);
+  border-bottom: 1px solid rgba(144, 109, 67, 0.4);
+}
+#highlighted-content .post-wrapper .post-content p {
+  text-align: justify;
+  margin-bottom: 1rem;
+}
+#highlighted-content .post-wrapper .post-content ul {
+  list-style: square inside;
+}
+#highlighted-content .post-wrapper .post-content ul li {
+  font-family: "Blair ITC Light";
+}
+#highlighted-content .post-wrapper .post-content ul li:not(:last-child) {
+  margin-bottom: 1rem;
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo:not(:last-child) {
+  margin-bottom: 2rem;
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo .equipe-identificacao-grupo {
+  margin-bottom: 1rem;
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo .equipe-identificacao-grupo .equipe-identificacao-nome-grupo {
+  color: #906D43;
+  font-family: "Blair ITC Standard";
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo .equipe-membro {
+  padding: 1rem 0.5rem;
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo .equipe-membro .equipe-membro-nome {
+  font-family: "Blair ITC Light";
+  margin-bottom: 0.5rem;
+}
+#highlighted-content .post-wrapper .post-content .article .equipe-grupo .equipe-membro ul li {
+  margin: 0 !important;
+  font-family: "Segoe UI Regular";
+  font-size: 0.8rem;
+}
+#highlighted-content .blog-posts {
+  margin: 2rem 0;
+}
+#highlighted-content .blog-posts .page-title {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+}
+#highlighted-content .blog-posts .page-title h3 {
+  text-align: center;
+  margin-bottom: 2rem;
+  display: inline-block;
+  color: #906D43;
+  padding: 0.5rem 1.5rem;
+  font-family: "Blair ITC Standard";
+  font-size: 1.5rem;
+  border-top: 1px solid rgba(144, 109, 67, 0.4);
+  border-bottom: 1px solid rgba(144, 109, 67, 0.4);
+}
+#highlighted-content .blog-posts .post-item {
+  border: 1px solid rgba(144, 109, 67, 0.3);
+}
+#highlighted-content .blog-posts .post-item:hover {
+  cursor: pointer;
+}
+#highlighted-content .blog-posts .post-item:not(:last-child) {
+  margin-bottom: 1.5rem;
+}
+#highlighted-content .blog-posts .post-item .post-title {
+  padding: 0.5rem 1rem;
+  color: #906D43;
+  font-family: "Blair ITC Light";
+  border-bottom: 1px solid rgba(144, 109, 67, 0.3);
+}
+#highlighted-content .blog-posts .post-item .post-metadata {
+  margin-bottom: 0.5rem;
+}
+#highlighted-content .blog-posts .post-item .post-metadata span {
+  font-size: 0.8rem;
+  padding: 0 1rem;
+  border-right: 1px solid rgba(144, 109, 67, 0.3);
+}
+#highlighted-content .blog-posts .post-item .post-metadata .post-categories {
+  padding: 0 1rem;
+  display: inline-block;
+}
+#highlighted-content .sidebar .widget {
+  margin-bottom: 2rem;
+}
+#highlighted-content .sidebar .widget-title {
+  color: #906D43;
+  font-size: 1.1rem;
+  font-family: "Blair ITC Standard";
+  margin-bottom: 0.5rem;
+}
+#highlighted-content .artigo .post-title {
+  padding: 1rem 1.5rem;
+  color: #906D43;
+  font-size: 1.75rem;
+  font-family: "Blair ITC Standard";
+  border-bottom: 1px solid #906D43;
+  margin-bottom: 1rem;
+}
+#highlighted-content .artigo .post-metadata {
+  font-size: 0.8rem;
+  margin-bottom: 2rem;
+}
+#highlighted-content .artigo .post-metadata span {
+  padding: 0 1rem;
+  border-right: 1px solid #906D43;
+}
+#highlighted-content .artigo .post-metadata ul {
+  display: inline-block;
+  padding: 0 1rem;
+  border-right: 1px solid #906D43;
+}
+#highlighted-content .artigo .post-content p {
+  margin-bottom: 1rem;
+}
+#highlighted-content .artigo .post-author {
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #181E26;
+  border-radius: 5px;
+  color: #f5f5f5;
+}
+#highlighted-content .artigo .post-author .post-author-information-name {
+  font-family: "Blair ITC Light";
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  #highlighted-content #destaque-areas-atuacao {
+    width: 85%;
+  }
+  #highlighted-content #destaque-areas-atuacao .area-atuacao {
+    padding: 1rem 3rem;
+    min-height: 300px;
+  }
+  #highlighted-content #destaque-areas-atuacao .area-atuacao .area-atuacao-descricao {
+    display: block;
+  }
+  #highlighted-content .post-wrapper {
+    margin: 3rem 4rem;
+  }
+}
+#blog-posts .post-container {
+  margin-bottom: 2rem;
+  height: 280px;
+}
+#blog-posts .post-container .post-image a {
+  color: #f5f5f5;
+  font-family: "Blair ITC Light";
+}
+#blog-posts .post-container .post-image a .post-identification {
+  background-color: rgba(24, 30, 38, 0.6);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+  padding: 0.8rem;
+  position: absolute;
+  min-height: 100%;
+  min-width: 100%;
+}
+#blog-posts .post-container .post-image a .post-identification .post-category {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  text-align: right;
+}
+#blog-posts .post-container .post-image a:hover .post-identification {
+  background-color: rgba(24, 30, 38, 0.8);
+}
+
+#contato {
+  color: #f5f5f5;
+  background-color: #181e26;
+}
+#contato .contato-item {
+  padding: 0.8rem;
+  border-bottom: 1px solid rgba(245, 245, 245, 0.1);
+}
+#contato .contato-item .contato-titulo {
+  color: #906D43;
+  margin-bottom: 0.5rem;
+  font-family: "Blair ITC Light";
+  font-size: 0.8rem;
+}
+#contato .contato-item .contato-titulo i {
+  margin-right: 0.3rem;
+}
+#contato .contato-item p {
+  font-size: 0.8rem;
+}
+#contato .contact-form {
+  margin-top: 2.5rem;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 0 25px #000;
+  border-radius: 10px;
+}
+#contato .contact-form .form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+#contato .contact-form .form-group label {
+  font-family: "Blair ITC Light";
+  font-size: 0.8rem;
+  color: #f5f5f5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.5rem;
+  pointer-events: none;
+  transition: 0.5s;
+}
+#contato .contact-form .form-group input {
+  color: #f5f5f5;
+  width: 100%;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid rgba(245, 245, 245, 0.1);
+  outline: none;
+  background-color: transparent;
+}
+#contato .contact-form .form-group input[type=email]:not(:-moz-placeholder-shown):invalid ~ label {
+  color: #906D43;
+  top: -1.5rem;
+  left: 0;
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+#contato .contact-form .form-group input[type=email]:not(:-ms-input-placeholder):invalid ~ label {
+  color: #906D43;
+  top: -1.5rem;
+  left: 0;
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+#contato .contact-form .form-group input:focus ~ label, #contato .contact-form .form-group input:valid ~ label, #contato .contact-form .form-group input[type=email]:not(:placeholder-shown):invalid ~ label {
+  color: #906D43;
+  top: -1.5rem;
+  left: 0;
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+#contato .contact-form .form-group textarea {
+  color: #f5f5f5;
+  width: 100%;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid rgba(245, 245, 245, 0.1);
+  outline: none;
+  background-color: transparent;
+}
+#contato .contact-form .form-group textarea:focus ~ label, #contato .contact-form .form-group textarea:valid ~ label {
+  color: #906D43;
+  top: -1.5rem;
+  left: 0;
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+#contato .contact-form .button-container {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+#contato .contact-form .send-button {
+  color: #f5f5f5;
+  background-color: rgba(144, 109, 67, 0.5);
+  font-family: "Blair ITC Light";
+  font-size: 0.8rem;
+}
+#contato .contact-form .send-button:hover {
+  background-color: rgba(144, 109, 67, 0.8);
+  box-shadow: 0 0 25px #080A0D;
+}
+
+@media (min-width: 768px) {
+  #contato .contact-form {
+    margin-top: 0 !important;
+  }
+}
+#footer {
+  color: #f5f5f5;
+  background-color: #010000;
+  padding: 1rem 0;
+  text-align: center;
+}
+#footer p {
+  font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+  #footer p {
+    font-size: 0.9rem;
+  }
+}
+.btn-accent {
+  color: #f5f5f5 !important;
+  background-color: #906D43 !important;
+  font-family: "Blair ITC Light";
+  font-size: 0.8rem;
+}
+
+.page-section {
+  padding: 3rem 0;
+}
+.page-section .section-title {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.page-section .section-title h2 {
+  display: inline-block;
+  padding: 1rem 2rem;
+  border-top: 1px solid #906d43;
+  border-bottom: 1px solid #906d43;
+  color: #906D43;
+  margin-bottom: 2.5rem;
+  font-family: "Blair ITC Standard";
+}

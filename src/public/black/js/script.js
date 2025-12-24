@@ -1,0 +1,493 @@
+
+      window.addEventListener("load", () => {
+        document.body.innerHTML = `
+        
+         <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-container container">
+        <a href="#" class="logo">Assessoria de Consulta</a>
+        <ul class="nav-menu">
+          <li class="nav-item"><a href="#home" class="nav-link">Início</a></li>
+          <li class="nav-item">
+            <a href="#about" class="nav-link">Quem Somos</a>
+          </li>
+          <li class="nav-item">
+            <a href="#services" class="nav-link">Serviços</a>
+          </li>
+          <li class="nav-item">
+            <a href="#testimonials" class="nav-link">Depoimentos</a>
+          </li>
+          <li class="nav-item"><a href="#faq" class="nav-link">FAQ</a></li>
+          <li class="nav-item">
+            <a href="#contact" class="nav-link">Contato</a>
+          </li>
+        </ul>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="hero-container">
+        <!-- Section 1 - Imagem com Zoom -->
+        <div class="hero-image-section">
+          <div class="hero-image">
+            <img src="imagens/mulheratt.png" alt="Consultora financeira" />
+          </div>
+        </div>
+
+        <!-- Section 2 - Texto -->
+        <div class="hero-content-section">
+          <div class="hero-content">
+            <h1>CONSULTA SEGURA E RÁPIDA</h1>
+            <p class="hero-subtitle">DESCUBRA SUAS MELHORES CONDIÇÕES AGORA</p>
+            <p class="hero-text">Atendimento rápido, seguro e online.</p>
+            <a href="formulario.html" class="btn btn-pulse">Quero Consultar Agora</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quem Somos -->
+    <section id="about" class="about">
+      <div class="container">
+        <h2 class="section-title">Quem Somos</h2>
+        <div class="about-container">
+          <div class="about-content">
+            <div class="about-images">
+              <div class="about-img">
+                <img src="imagens/adv1.png" alt="Advogado especialista" />
+              </div>
+              <div class="about-img">
+                <img src="imagens/adv2.png" alt="Advogada especialista" />
+              </div>
+            </div>
+            <div class="about-text">
+              <p>
+                Somos uma equipe de especialistas em regularização financeira
+                com mais de 10 anos de experiência no mercado. Nossa missão é
+                ajudar pessoas e empresas a recuperarem sua saúde financeira,
+                negociando dívidas e regularizando o nome de forma transparente
+                e eficiente.
+              </p>
+              <p>
+                Contamos com advogados especializados em direito do consumidor e
+                consultores financeiros que trabalham em conjunto para oferecer
+                a melhor solução para cada caso, sempre respeitando a legislação
+                vigente e garantindo a privacidade dos dados dos nossos
+                clientes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Serviços -->
+    <section id="services" class="services">
+      <div class="container">
+        <h2 class="section-title">Nossos Serviços</h2>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="bi bi-person-check"></i>
+            </div>
+            <h3 class="service-title">Análise Personalizada</h3>
+            <p>
+              Avaliamos sua situação financeira individualmente para encontrar
+              as melhores soluções para o seu caso específico.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="bi bi-file-text"></i>
+            </div>
+            <h3 class="service-title">Consulta de Registros Públicos</h3>
+            <p>
+              Verificamos sua situação em órgãos de proteção ao crédito e
+              identificamos pendências que precisam ser regularizadas.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="bi bi-handshake"></i>
+            </div>
+            <h3 class="service-title">Negociação Facilitada</h3>
+            <p>
+              Intermediamos a negociação direta com credores, buscando as
+              melhores condições de pagamento e descontos.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h3 class="service-title">Privacidade e Dados (LGPD)</h3>
+            <p>
+              Garantimos a segurança e privacidade dos seus dados, seguindo
+              rigorosamente as diretrizes da LGPD.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section id="testimonials" class="testimonials">
+      <div class="container">
+        <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-header">
+              <div class="testimonial-img">
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    background-color: #ddd;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                  "
+                >
+                  <img src="/imagens/depoimento1.png" alt="" />
+                </div>
+              </div>
+              <div class="testimonial-info">
+                <h4>Maria Silva</h4>
+                <div class="stars">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                </div>
+              </div>
+            </div>
+            <p>
+              "Consegui regularizar meu nome em menos de 30 dias. A equipe foi
+              muito atenciosa e explicou todo o processo. Recomendo!"
+            </p>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-header">
+              <div class="testimonial-img">
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                  "
+                >
+                  <img src="/imagens/depoimento2.png" alt="" />
+                </div>
+              </div>
+              <div class="testimonial-info">
+                <h4>João Santos</h4>
+                <div class="stars">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-half"></i>
+                </div>
+              </div>
+            </div>
+            <p>
+              "Estava com o nome negativado há anos e não sabia por onde
+              começar. A consultoria me orientou e consegui negociar minhas
+              dívidas com descontos excelentes."
+            </p>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-header">
+              <div class="testimonial-img">
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    background-color: #ddd;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                  "
+                >
+                  <img src="/imagens/depoimento2.jpeg" alt="" />
+                </div>
+              </div>
+              <div class="testimonial-info">
+                <h4>Ana Costa</h4>
+                <div class="stars">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                </div>
+              </div>
+            </div>
+            <p>
+              "Processo 100% digital e seguro. Consegui resolver tudo pelo
+              celular, sem precisar me deslocar. Atendimento excelente!"
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq">
+      <div class="container">
+        <h2 class="section-title">Perguntas Frequentes</h2>
+        <div class="faq-container">
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Quanto tempo leva para regularizar o nome?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                O prazo para regularização do nome varia conforme a complexidade
+                do caso, mas em média, conseguimos resolver em 30 a 60 dias.
+                Algumas situações mais simples podem ser resolvidas em menos
+                tempo.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Quais são os valores dos serviços?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Nossos honorários são baseados no sucesso da negociação. Só
+                cobramos após a regularização efetiva do seu nome. A consulta
+                inicial é gratuita e sem compromisso.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Como é garantida a segurança dos meus dados?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Trabalhamos com sistemas criptografados e seguimos rigorosamente
+                as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus
+                dados são tratados com total confidencialidade.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Preciso me deslocar até o escritório?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Não! Todo o processo é realizado de forma 100% digital. Você
+                pode resolver tudo pelo celular ou computador, sem precisar sair
+                de casa.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Quais tipos de dívida vocês negociam?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Negociamos todos os tipos de dívidas: cartão de crédito,
+                empréstimos, financiamentos, contas de consumo, tributos e
+                outras obrigações financeiras.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Como funciona a consulta gratuita?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Na consulta gratuita, analisamos sua situação financeira,
+                identificamos as pendências e explicamos as opções disponíveis
+                para regularização, sem qualquer custo ou compromisso.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>O que preciso para começar?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Basta entrar em contato conosco através do site ou WhatsApp.
+                Vamos solicitar alguns documentos básicos para análise e dar
+                início ao processo.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>Vocês emitem nota fiscal?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Sim, somos uma empresa regularizada e emitimos nota fiscal de
+                todos os serviços prestados.
+              </p>
+            </div>
+          </div>
+          <div class="accordion">
+            <div class="accordion-header">
+              <span>E se não conseguir regularizar meu nome?</span>
+              <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="accordion-content">
+              <p>
+                Nosso trabalho é baseado no sucesso. Se não conseguirmos
+                regularizar seu nome, você não paga pelos nossos serviços. Esta
+                é a nossa garantia.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+      <div class="footer-container">
+        <!-- Imagens de Site Seguro -->
+        <div class="security-badges">
+          <img
+            src="imagens/footer.png"
+            alt="Site Seguro"
+            class="security-badge"
+          />
+        </div>
+
+        <div class="footer-contact">
+          <p><strong>Email:</strong> suporte@vilatendimento.site</p>
+          <p><strong>CNPJ:</strong> 50.316.711/0001-48</p>
+          <p>
+            <strong>Endereço:</strong> Rua Largo Dom Henrique Soares da Costa,
+            42, Edif. Breda, Andar 10, Sala 1019, Centro – Maceió/AL, 57020-170
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href="politica.html" class="footer-link">Política de Privacidade</a>
+          <a href="politica.html" class="footer-link">Termos de Uso</a>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; Michele Vila Sociedade Individual de Advocacia - Todos os
+            direitos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+     
+        `;
+
+       // Menu Mobile
+      const hamburger = document.querySelector(".hamburger");
+      const navMenu = document.querySelector(".nav-menu");
+
+      hamburger.addEventListener("click", () => {
+        hamburger.classList.toggle("active");
+        navMenu.classList.toggle("active");
+      });
+
+      document.querySelectorAll(".nav-link").forEach((n) =>
+        n.addEventListener("click", () => {
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
+        })
+      );
+
+      // Accordion FAQ
+      const accordionHeaders = document.querySelectorAll(".accordion-header");
+
+      accordionHeaders.forEach((header) => {
+        header.addEventListener("click", () => {
+          const accordionContent = header.nextElementSibling;
+          const isActive = header.classList.contains("active");
+
+          // Fecha todos os accordions
+          document.querySelectorAll(".accordion-header").forEach((h) => {
+            h.classList.remove("active");
+          });
+          document.querySelectorAll(".accordion-content").forEach((c) => {
+            c.classList.remove("active");
+          });
+
+          // Abre o accordion clicado se não estava ativo
+          if (!isActive) {
+            header.classList.add("active");
+            accordionContent.classList.add("active");
+          }
+        });
+      });
+
+      // Banner de Cookies
+      const cookieBanner = document.getElementById("cookieBanner");
+      const acceptCookies = document.getElementById("acceptCookies");
+      const declineCookies = document.getElementById("declineCookies");
+
+      // Verifica se o usuário já aceitou os cookies
+      if (!localStorage.getItem("cookiesAccepted")) {
+        // Mostra o banner após um pequeno delay
+        setTimeout(() => {
+          cookieBanner.style.display = "block";
+        }, 1000);
+      }
+
+      // Aceitar cookies
+      acceptCookies.addEventListener("click", () => {
+        localStorage.setItem("cookiesAccepted", "true");
+        cookieBanner.style.display = "none";
+      });
+
+      // Recusar cookies
+      declineCookies.addEventListener("click", () => {
+        localStorage.setItem("cookiesAccepted", "false");
+        cookieBanner.style.display = "none";
+      });
+
+      // Smooth scroll para links internos
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const targetId = this.getAttribute("href");
+          if (targetId === "#") return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: "smooth",
+            });
+          }
+        });
+      });      
+        
+    });
+        
+
