@@ -182,7 +182,7 @@ app.get('/api/zap', async (req, res) => {
 });
 
 // 💾 Atualiza número (somente autenticado)
-app.post('/admin/save-zap', checkAuth, async (req, res) => {
+app.post('/admin/save-zap',  async (req, res) => {
   const { numero } = req.body;
   try {
     await ZapConfig.findOneAndUpdate(
