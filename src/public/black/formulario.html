@@ -898,24 +898,41 @@
         });
 
         // WhatsApp Button Click
-        whatsappBtn.addEventListener("click", function (e) {
-          e.preventDefault();
 
-          const cpf = localStorage.getItem("cpf_usuario");
-          if (!cpf || !validarCPF(cpf)) {
-            cpfFeedback.textContent = "CPF inválido!";
-            return;
-          }
 
-          const numeroWhats = "5511912400960";
-          const mensagem = `Olá! Gostaria de consultar meu CPF: ${cpf}`;
-          const url = `https://wa.me/${numeroWhats}?text=${encodeURIComponent(
-            mensagem
-          )}`;
+// WhatsApp Button Click
+whatsappBtn.addEventListener("click", async function (e) {
+  e.preventDefault();
 
-          localStorage.removeItem("cpf_usuario");
-          window.location.href = url;
-        });
+  const cpf = localStorage.getItem("cpf_usuario");
+  if (!cpf || !validarCPF(cpf)) {
+    cpfFeedback.textContent = "CPF inválido!";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/zap");
+    const data = await res.json();
+    const numeroWhats = data.numero;
+
+    if (!numeroWhats) {
+      alert("Número de WhatsApp não configurado.");
+      return;
+    }
+
+    const mensagem = `Olá! Gostaria de consultar meu CPF: ${cpf}`;
+    const url = `https://wa.me/${numeroWhats}?text=${encodeURIComponent(
+      mensagem
+    )}`;
+
+    localStorage.removeItem("cpf_usuario");
+    window.location.href = url;
+  } catch (err) {
+    console.error("Erro ao buscar número do WhatsApp:", err);
+    alert("Erro ao conectar com servidor. Tente novamente mais tarde.");
+  }
+});
+
       });
     </script>
   </body>
