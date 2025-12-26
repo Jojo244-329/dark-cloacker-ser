@@ -2,16 +2,27 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel Zap</title>
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
-  <h2>Número atual do WhatsApp:</h2>
-  <p id="numeroAtual">Carregando...</p>
+   <h1>Administração do Zap</h1>
+  <div class="box">
+    <label>Número atual:</label>
+    <p id="numeroAtual">Carregando...</p>
 
-  <input type="text" id="novoNumero" placeholder="Ex: 5511999999999">
-  <button id="btnSalvar">Atualizar</button>
+    <label for="novoNumero">Novo número:</label>
+    <input type="text" id="novoNumero" placeholder="Ex: 5511999999999"/>
 
-  <p id="resposta"></p>
+    <div class="btns">
+      <button class="save" id="btnSalvar">Salvar</button>
+      <button class="delete" id="btnApagar">Excluir</button>
+    </div>
+
+    <div class="status" id="resposta"></div>
+  </div>
+
 
   <script src="../js/zap.js"></script>
 </body>

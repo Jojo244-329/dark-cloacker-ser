@@ -197,6 +197,16 @@ app.post('/admin/save-zap',  async (req, res) => {
   }
 });
 
+app.delete('/admin/delete-zap', checkAuth, async (req, res) => {
+  try {
+    await ZapConfig.deleteMany({});
+    res.json({ message: "Número apagado com sucesso." });
+  } catch (err) {
+    console.error("Erro ao apagar zap:", err);
+    res.status(500).json({ error: "Erro ao apagar número" });
+  }
+});
+
 
 
 
