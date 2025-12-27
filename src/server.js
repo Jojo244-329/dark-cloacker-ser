@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 🗂️ Serve arquivos estáticos das pastas white e black
-app.use(express.static(path.join(__dirname, "public", "white")));
+app.use("/white", express.static(path.join(__dirname, "public", "white")));
 app.use(express.static(path.join(__dirname, "public", "black")));
 
 
